@@ -41,14 +41,33 @@ def _sha256_file(path: str) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def _strings_rodata(binary_path: str, min_len: int = 4):
+    """Recupera cadenas del binario, restringido a sección .rodata (rizin izj).
+    Evita tratar datos binarios como cadenas literales."""
     try:
-        p = subprocess.run(["strings", "-n", str(min_len), binary_path],
-                           capture_output=True, text=True, timeout=20)
+        p = subprocess.run(["/usr/bin/rizin", "-q", "-N", "-e", "scr.color=0",
+                             "-A", "-c", "izj", binary_path],
+                            capture_output=True, text=True, timeout=30)
     except Exception:
         return []
-    if p.returncode != 0:
+    if p.returncode != 0 or not p.stdout:
         return []
-    return [l for l in p.stdout.splitlines() if l]
+    import json as _json
+    try:
+        rows = _json.loads(p.stdout[p.stdout.find("["):])
+    except Exception:
+        return []
+    out = []
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        if r.get("section") != ".rodata":
+            continue
+        sval = r.get("string") or ""
+        sval = str(sval)
+        if len(sval) < min_len:
+            continue
+        out.append(sval)
+    return out
 
 def _pick_function_candidate(recon_votes: List[Dict]) -> Optional[Dict]:
     cand = [h for h in recon_votes if h.get("classification") == "FUNCTION_CANDIDATE"]
@@ -59,17 +78,30 @@ def _pick_function_candidate(recon_votes: List[Dict]) -> Optional[Dict]:
     return cand[0]
 
 def _viable_literals(strings: List[str]) -> List[str]:
+    """Heurística honesta: descarta datos que no parecen cadenas del programa.
+    Preferimos literales alfanuméricos con separadores comunes de directorio."""
     out = []
     for s in strings:
-        s = str(s)
-        if not (3 <= len(s) <= 16):
+        s = str(s).strip()
+        if not (2 <= len(s) <= 64):
             continue
         if not all(32 <= ord(c) < 127 for c in s):
             continue
         low = s.lower()
-        if low in ("gnu", "libc", "usage", "name", "abort", "error", "error:", "warning"):
+        if low in ("gnu", "usage", "error", "warning"):
             continue
-        out.append(s)
+        # descriptor de ayuda y metadatos → reservado, no útil como hint semántica
+        if any(tok in low for tok in ("%s", "%.", "option]", "name...", "hanlder",
+                                       "usage:", "bugs to", "version", "home page",
+                                       "how to", "help", "full documentation", ".en")):
+            continue
+        if not any(c.isalpha() or c in ('/', '.', '-', '_', '%') for c in s):
+            continue
+        # tolerar una baseline: cualquier cosa con letra o símbolo con ruta común
+        if s.replace('/', '').replace('.', '').replace('-', '').replace('_', '').replace('%', '').isalpha():
+            out.append(s)
+        elif any(sep in s for sep in ("//", "bin/", ".so", "localtime", "PATH", "HOME", "SHELL")):
+            out.append(s)
     return out[:8]
 
 def _rivals_from_literal(literal: str) -> List[RivalHypothesis]:
@@ -118,6 +150,7 @@ def discover_unknown_function(binary_path: str,
             "artifact": arch,
             "target_sha256": _sha256_file(binary_path) if os.path.isfile(binary_path) else None,
             "recon": {"artifact": arch, "counts": recon.get("counts") if isinstance(recon, dict) else None},
+            "semantics_status": "NOT_DETERMINED",
             "_no_profile_imported": _NO_PROFILE_IMPORTED,
         }
 

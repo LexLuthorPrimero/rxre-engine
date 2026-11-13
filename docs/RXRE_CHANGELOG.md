@@ -13,6 +13,10 @@
 
 - **§1050 R3 — quinto objetivo sellado (dirname)**: bounded property reconstrucciónbyte-exact sobre corpus 2×1.901–1.917 (seeds 20261113/14), C11 independiente, verify.sh 15 etapas con dirname, manifest ampliado 60 artefactos, identidad push fail-closed /usr/bin/dirname (aac6a889…), stage 13/15. Update-19. Terceros NOT_EXECUTED.
 
+## 2026-11-13 (P0 on dirname)
+
+- **§Etapa 6 Tests sobre binario real fijados**: `test_discovery_on_dirname.py`; `.rodata`-literal analysis (rizin izj); no false literal candidates dumped onto any classification PASS; `_no_profile_imported == True`; verify expects pins **78 passed, 2 skipped** distilled. Terceros NOT_EXECUTED.
+
 ## 2026-11-13 (P0 + bug crítico Fixes: discovery + reconstructor)
 
 - **Bug latente en `reconstructor.py`**: `subprocess`/`re`/`_json` no apropiadamente importados -> todos los binarios analizados quedaban `ANALYSIS_FAILED` por 0 CFG. Corregido. Capacidad general de análisis desbloqueada.  (v1.6.0)
