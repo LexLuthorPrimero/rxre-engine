@@ -102,7 +102,8 @@ cd rxre-cleanroom && gcc -std=c11 -O2 -o /tmp/verify_f \
 ## Siblings
 
 - https://github.com/LexLuthorPrimero/rxre-cleanroom — public sealed package
-  (MIT): the canonical, self-contained way to verify the reconstructions.
+  (MIT, [v1.1.0 release](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.1.0)):
+  the canonical, self-contained way to verify the reconstructions.
 - Issue #1 of that repository is the blind-verification call that decides
   whether the project's primary claim stands.
 
