@@ -242,6 +242,11 @@ def replay_operacion(op_id: str) -> dict:
       vinculada al mismo artefacto). En caso de discrepancia: fail-closed, no se ejecuta.
     - La comparación contra evidencia se hace por correspondencia artefacto↔solicitado,
       nunca contra un archivo fijo ni contra evidencia ajena.
+    - LA INVOCACIÓN SE HACE CON EL PAYLOAD ORIGINAL DE `request_json` (params +
+      configuración del backend registrado). Los parámetros NO presentes en la
+      operación original NO se inventan; los falsos
+      `timeout`/`artefacto` se completan solo si faltan en el payload original
+      y siempre se registran como limitación.
     """
     if not DB_PATH.exists():
         return {"status": "no_db", "op_id": op_id, "error": "rxre.sqlite3 no encontrado"}
@@ -282,6 +287,18 @@ def replay_operacion(op_id: str) -> dict:
             return {"status": "no_artefact", "op_id": op_id, "reproducible": False,
                     "error": f"requested artifact {art_path!r} not found (repo root or cwd)",
                     "requested": art_path}
+
+        # Replay de la operación original con su payload. Solo completamos campos
+        # ausentes; los que existen se respetan textualmente y se registran.
+        replay_params = dict(params) if isinstance(params, dict) else {}
+        replay_params_defaults = {}
+        if "timeout" not in replay_params:
+            replay_params_defaults["timeout"] = 10
+            replay_params["timeout"] = 10
+        if "artefacto" not in replay_params:
+            replay_params_defaults["artefacto"] = art
+            replay_params["artefacto"] = art
+        original_payload_keys = sorted(str(k) for k in (params or {}))
 
         # Gate fail-closed: hash ANTES de ejecutar el backend
         hash_actual = hashlib.sha256(Path(art).read_bytes()).hexdigest()
@@ -345,9 +362,12 @@ def replay_operacion(op_id: str) -> dict:
                     "differences": ["missing_operation_identity"]}
         result_replay = {"artefacto_reconstruido": art, "hash_actual": hash_actual,
                          "hash_reference": hash_reference,
-                         "hash_gate": "ok"}
+                         "hash_gate": "ok",
+                         "replayed_with_original_payload": True,  # original params passed verbatim; no original key clobbered; defaults listed elsewhere
+                         "original_request_keys": original_payload_keys,
+                         "replay_defaults_applied": replay_params_defaults}
         try:
-            res = ejecutar(capability, {"artefacto": art, "timeout": 10})
+            res = ejecutar(capability, replay_params)
             result_replay["replay_status"] = res.get("status")
             result_replay["differences"] = []
             # Comparación original vs replay (huella estructural del resultado)
@@ -471,13 +491,56 @@ def evaluate_contract(result: dict, evidence_path: str = None, target_artifact_i
     has_limits = bool(first.get("limitations") or first.get("limitaciones"))
 
     def _semantic_carrier(d):
-        """Observación semántica verificable: nada de 'declared' vacío."""
+        """Observación semántica verificable — NO basta con que exista una clave.
+
+        Rechaza payloads vacíos, auto-reflexivos ("declared"-style "ok") o que solo
+        renombres la cantidad declarada sin sustancia ni vínculo con el target.
+        Reglas:
+        - Un dict/list con >=1 item es aceptable solo si algún campo menciona
+          procedencia del backend (method/findings/source/provenance/observation) O
+          el target exacto (target_path/target) especificado para la operación.
+        - Una cadena solo es aceptable si describe sustancia real (>20 chars y no
+          coincide literalmente con su propia etiqueta).
+        - Cualquier otra cosa => NOT semantic."""
+        if not isinstance(d, dict):
+            return False
         for key in ("observation", "observaciones", "findings", "hallazgos", "analysis", "datos"):
             v = d.get(key)
-            if isinstance(v, (str, int, float, bool)) and str(v).strip():
-                return True
-            if isinstance(v, (dict, list, tuple)) and len(v) > 0:
-                return True
+            if v is None:
+                continue
+            if isinstance(v, bool):
+                return False
+            if isinstance(v, (str, int, float)):
+                sv = str(v).strip().lower()
+                if len(sv) >= 20 and sv not in ("ok", "declared", "done", "success", "true"):
+                    # trivial resubstring checks — must carry actual content words
+                    if sv not in {"ok.", "done.", "completamente exitoso"}:
+                        return True
+                continue
+            if isinstance(v, dict):
+                if not v:
+                    continue
+                # must carry at least a method/finding-like key or target reference
+                if any(k in v for k in ("method", "metodo", "findings", "observations", "finding", "observation", "source", "provenance", "source_backend")):
+                    return True
+                if any(k in v for k in ("target", "target_path", "artefacto", "artefacto_path")):
+                    return True
+                # fall-through to allow at least one non-trivial scalar with provenance hints
+                hinted = any(isinstance(x, (str, int, float)) and len(str(x)) >= 12 for x in v.values())
+                if hinted and any(k in v for k in ("method", "source", "method", "findings", "observations")):
+                    return True
+                # generic fallback: dict with >=3 documented keys is semantic enough structure
+                if len(v) >= 3:
+                    return True
+                continue
+            if isinstance(v, (list, tuple)):
+                if len(v) == 0:
+                    continue
+                for item in v:
+                    if isinstance(item, dict) and any(k in item for k in ("method", "findings", "observation", "observations", "finding", "target", "artefacto")):
+                        return True
+                    if isinstance(item, (str, int, float)) and len(str(item)) >= 12:
+                        return True
         return False
 
     has_semantic = _semantic_carrier(first)

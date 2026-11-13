@@ -160,3 +160,21 @@ def test_partial_never_reproducible(monkeypatch, tmp_path):
     res = replay_mod.replay_operacion("op_p")
     assert res["replay_result"]["equivalence"]["outcome"] == "PARTIAL"
     assert res["reproducible"] is False
+
+def test_replay_uses_original_request_payload(monkeypatch, tmp_path):
+    """ADVERSARIAL: replay ejecuta con el payload original de request_json, no con uno ad hoc."""
+    art, sha = _setup(monkeypatch, tmp_path, [])
+    db = _make_db(tmp_path, [("op_rp", "binary.inspect",
+                              {"target": str(art), "timeout": 25, "custom_flag": True, "backend": "rizin"},
+                              {"artefacto_hash_sha256": sha, "backend": {"tool_version": "fake"},
+                               "result": {"functions": 42, "sections": 7}})])
+    monkeypatch.setattr(replay_mod, "DB_PATH", db)
+    res = replay_mod.replay_operacion("op_rp")
+    backend, params = FakeBackend.CALLS[0]
+    assert backend == "binary.inspect"
+    assert params.get("timeout") == 25
+    assert params.get("custom_flag") is True
+    assert params.get("backend") == "rizin"
+    assert res["status"] == "replayed"
+    assert res["replay_result"]["replayed_with_original_payload"] is True
+    assert res["replay_result"]["original_request_keys"] == ["backend", "custom_flag", "target", "timeout"]

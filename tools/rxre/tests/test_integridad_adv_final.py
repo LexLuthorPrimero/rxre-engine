@@ -55,10 +55,28 @@ def test_5_archivo_otro_artefacto():
 
 def test_5b_evidencia_target_coinciden_aceptada():
     repo_root = Path(__file__).resolve().parents[3]
-    # Evidencia (/bin/ls) vinculada al artefacto solicitado (/bin/ls == /usr/bin/ls): pasa la puerta y acepta
-    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared","observation":{"target":"/bin/ls","functions":37}}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
-    assert res["contract_state"] == "COMPLETE", f"evidencia vinculada e íntegra debe aceptar: {res}"
+    # Evidencia (/bin/ls) vinculada al artefacto solicitado (/bin/ls == /usr/bin/ls): observación verificable
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},
+                             "results":[{"status":"declared",
+                                          "observation":{"method":"rizin_cfg_inspection",
+                                                         "target": "/bin/ls",
+                                                         "findings":[{"function":"main","vaddr":"0x1234"}]}}]},
+                            str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
+    assert res["contract_state"] == "COMPLETE", f"evidencia vinculada e íntegra con observación debe aceptar: {res}"
     assert res["epistemic"] == "VALID"
+
+def test_5c2_observacion_trivial_no_acepta():
+    repo_root = Path(__file__).resolve().parents[3]
+    # BK_OK + precheck + evidencia í�ntegra, PERO observación auto-reflexiva ('ok')ï
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared","observation":"ok"}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
+    assert res["contract_state"] != "COMPLETE"
+    assert res["epistemic"] != "VALID"
+
+def test_5d_observacion_solo_flag_no_acepta():
+    repo_root = Path(__file__).resolve().parents[3]
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared","observation":{"flag": True}}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
+    assert res["contract_state"] != "COMPLETE"
+    assert res["epistemic"] != "VALID"
 
 def test_5c_resultado_declarado_sin_observacion_no_acepta():
     repo_root = Path(__file__).resolve().parents[3]

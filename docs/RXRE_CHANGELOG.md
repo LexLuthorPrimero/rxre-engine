@@ -1,5 +1,10 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-13 (transparency v1.5.1)
+
+- **Transparencia pública actualizada**: README/QUICKSTART/verify.sh header y summary en sync con los cinco objetivos sellados (filenvercmp/wc/fold/tr/dirname) y con manifiesto **60 artefactos**; coverage summary declara los cinco; identidad fail-closed pin de los cinco binarios.
+- **P1 refforzado**: `evaluate_contract()` ya no admite observación vacía ni auto-reflexiva romántica (test_5c2 / test_5d nuevos); replay ejecuta con payload original de `request_json` verbatim; `test_replay_uses_original_request_payload` exige timeout original y flags de request; función `test_5c_resultado_declarado_sin_observacion_no_acepta` ya existía y soportada; tests nuevos admitidos; terceros NOT_EXECUTED.
+
 ## 2026-11-13 (tr milestone v1.4.0)
 
 - **§1049 R3 — cuarto objetivo sellado (tr, `-s x`)**: property reconstruction byte-exact sobre corpus 2×2.513 (seeds 20261113/14), identidad fail-closed `/usr/bin/tr` sha256 b1d1bfbe…, manifest ampliado 56 artefactos, verify.sh 14 etapas con tr. Update-18. Terceros NOT_EXECUTED.

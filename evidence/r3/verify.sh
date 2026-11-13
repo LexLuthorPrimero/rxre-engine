@@ -1,5 +1,5 @@
 #!/bin/sh
-# RXRE-R3 self-contained verification — filenvercmp AND wc.
+# RXRE-R3 self-contained verification — five bounded targets.
 # One command; seals + builds + differential + suites. No sibling repo needed.
 # Requires: gcc, sha256sum, sh, python3 + pytest.
 set -e
@@ -97,6 +97,8 @@ gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/foldwrap" fold_20261113/foldwrap
 echo "fold: 6 gated regenerations verified (2x w4 + w1/w2/w3/w8)"
 
 echo "== 12/15 tr — etapa 5 reconstruction vs sealed native oracle (2 gens) =="
+
+echo "== 12/15 tr — etapa 5 reconstruction vs sealed native oracle (2 gens) =="
 gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/trwrap" tr_20261113/trwrap.c
 "$TMP/trwrap" tr_20261113/cases_tr_seed20261113.txt verify
 "$TMP/trwrap" tr_20261113/cases_tr_seed20261114.txt verify
@@ -122,7 +124,7 @@ PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_mente_fold_rivals.py" -q)
 printf '%s\n' "$PYTEST_OUT"
 PYTEST_COUNT=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ passed' | awk '{print $1}')
-EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-69}"
+EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-72}"
 EXPECT_SKIPPED="${RXRE_ENGINE_EXPECT_SKIPPED:-2}"
 ACTUAL_SKIPPED=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ skipped' | awk '{print $1}')
 ACTUAL_SKIPPED=${ACTUAL_SKIPPED:-0}
@@ -135,6 +137,9 @@ fi
 echo "== 15/15 coverage summary =="
 echo "filenvercmp: 4 sealed runs (2 generations + challenge corpus + locale invariance + i18n black-box) — all byte-exact"
 echo "wc: 11 corpora verified (C + es_AR.utf8; -m/-L/flags subtests)"
+echo "fold: 6 gated regenerations verified — all byte-exact"
+echo "tr: 2 generations verified (squeeze, -s x) — all byte-exact"
+echo "dirname: 2 generations verified (parent directory) — all byte-exact"
 echo "engine: ${PYTEST_COUNT} pytest tests passed (count reported by pytest itself)"
 echo ""
 echo "== 15/15 VERIFY: all steps passed =="
