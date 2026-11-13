@@ -13,6 +13,10 @@
 
 - **§1050 R3 — quinto objetivo sellado (dirname)**: bounded property reconstrucciónbyte-exact sobre corpus 2×1.901–1.917 (seeds 20261113/14), C11 independiente, verify.sh 15 etapas con dirname, manifest ampliado 60 artefactos, identidad push fail-closed /usr/bin/dirname (aac6a889…), stage 13/15. Update-19. Terceros NOT_EXECUTED.
 
+## 2026-11-13 (MENTE synthesis e2e)
+
+- **§1054 MENTE synthesis e2e**: `test_discovery_synthesis.py` — primer bucle completo discover→synthesis→byte-exact-diff sobre target desconocido compilado en tmp_path (no source opened by pipeline); literals 'alpha'/'beta' recuperados de rodata; C regenerado feamente (strncmp+sentinels); differential vs original 0 mismatches en ~25 trials; verify pin espera **78 passed, 2 skipped**. Terceros NOT_EXECUTED. P0 remains OPEN para binarios sin literal resources.
+
 ## 2026-11-13 (P0 on dirname)
 
 - **§1053 MENTE multi-round**: `mente_cycle` ahora integra iteraciones de discriminación, usado por `test_discovery_loopbench.py` — 3 rivales refutados, PREFIX sobrevive, NOT_DETERMINED. verify pin espera **77 passed, 2 skipped**. Terceros NOT_EXECUTED.

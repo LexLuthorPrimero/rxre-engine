@@ -39,7 +39,7 @@ sh evidence/r3/verify.sh
 (2) identidad nativa de `ls`/`wc`, (3–4) build + diferencial de las dos
 generaciones (34.145×2), (5) challenge corpus (3.100 + 3.241), (6) invariancia
 de locale, (7) i18n black-box, (8–10) wc en `LC_ALL=C` y `es_AR.utf8` (11 corpora),
-(11) suite pytest (77 passed, 2 skipped en clon público), (12) resumen.
+(11) suite pytest (78 passed, 2 skipped en clon público), (12) resumen.
 Cola esperada: `VERIFY: all steps passed`.
 
 ## 3. Qué comprobar tú mismo (no te lo crea nadie, ni el autor)
