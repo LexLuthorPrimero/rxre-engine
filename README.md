@@ -30,7 +30,7 @@ Only two targets exist, with sealed evidence inside `evidence/r3/`:
 |---|---|---|---|
 | filenvercmp (sort = version) in /usr/bin/ls — sha256 54e936d3... | semantic C reconstruction | 34,145 x 2 sealed pairs (seeds 20261112/13, 0 divergences); adversarial challenge 3,100+141 / 0 divergences; locale-invariance byte-equal C ≡ es_AR.utf8; i18n black-box 200 names identity vs native ls -v | ok byte-exact vs native |
 | wc in /usr/bin/wc — sha256 81d61459... | semantic C reconstruction | C locale + es_AR.utf8; default / flags / -m multibyte / -L width / --files0-from / flags x multibyte / files0-from adversarial | ok 0 divergences vs native GNU |
-| fold in /usr/bin/fold — sha256 95030461... | property reconstruction (line-wrap width, -w 4) | 2 sealed generations (2.554 each, seeds 20261113/14); valid UTF-8 inputs only; byte-exact vs native `/usr/bin/fold -w 4` | ok 0 divergences vs native GNU |
+| fold in /usr/bin/fold — sha256 95030461... | property reconstruction (line-wrap width) | 2 sealed generations (2.554 each, -w 4, seeds 20261113/14) + gated w=1/2/3/8 corpora (1.054 each; 6 gated regenerations); valid UTF-8 only; byte-exact vs native `/usr/bin/fold -w N` | ok 0 divergences vs native GNU |
 
 Details, logs and matrices live in `evidence/r3/` (`EXPEDIENTE_R3.md` is the full
 case file — Spanish).

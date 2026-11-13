@@ -127,8 +127,10 @@ static size_t unescape(const char *src, uint8_t out[65536]) {
 
 int main(int argc, char **argv) {
     if (argc < 2) return 2;
-    if (argc == 3) {
+    if (argc >= 3) {
         /* verify mode */
+        int target_w = 4;
+        if (argc >= 3 && argv[2][0] != '\0') target_w = atoi(argv[2]);
         FILE *cf = fopen(argv[1], "r");
         if (!cf) return 2;
         char line[131072];
@@ -144,7 +146,7 @@ int main(int argc, char **argv) {
             int fd = mkstemp(tmp);
             if (fd < 0) return 2;
             FILE *tf = fdopen(fd, "w+b");
-            emit_fold(a, an, 4, tf);
+            emit_fold(a, an, target_w, tf);
             fflush(tf);
             /* read back */
             fseek(tf, 0, SEEK_SET);

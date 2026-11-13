@@ -1,17 +1,20 @@
 # R3 — fold (GNU coreutils 9.10 /usr/bin/fold, Fedora 44 fc44) — milestone etapa 3
-# Sello: corpus ANTES de dotar a la reconstrucción de nada (gen_fold_cases.py lo único hecho por el autor).
-# Identidad nativa (fail-closed; value of verification = the host's value):
+# Sello: corpus ANTES de dotar a la reconstrucción de nada (gen_fold_cases.py).
+# Identidad nativa (fail-closed; valor de verificación = valor del host):
 #   /usr/bin/fold = sha256:9503046131ed5070acca13388497241d213cb8d7f9d096fd1dcecacd0bc325d7  (coreutils-9.10-5.fc44.x86_64)
-#   size = 36.632 bytes
-# Objetivo de la etapa: reconstruir UNA propiedad (ancho de línea en celdas con tab stop 8), no el binario completo.
+# Objetivo de la etapa: reconstruir UNA propiedad (cell width, tab stop 8), no el binario completo.
 # Modelo independiente escrito a mano: EAW W/F=2, Cc/Cn/Cs/Co/Mn→0, jamo conjoining U+1160-11FF→0,
-# soft-hyphen 0xAD→1 (quirk observado), tab→next multiple of 8, salto "antes" del codepoint que
-# exceda w con contenido previo no vacío; línea "vacía" puede desbordarse (regla empírica con evidencia sellada abajo).
-sha256:41a2d590b6af31f3d8f1d8467ba35ddb59ebd92aa5f44c72d663b71859946a7d  cases_fold_seed20261113.txt  (2.554 casos; seed 20261113)
-sha256:0e022b21e13be74f450fab9a098d33ca64c6f5f6eb177f973c21170ea0713f52  cases_fold_seed20261114.txt  (2.554 casos; seed 20261114)
-sha256:a4f277ca43065400923ec86f6113e49744ec01949ae9b174f832c51574520a87  foldwrap.c  (reconstrucción 142 líneas, C11)
-sha256:29c34788895038e6c247113f8062acee730d561a1b34c82a69e037207b8f07d6  gen_fold_cases.py  (generador sellado)
-Oráculo: /usr/bin/fold -w 4 invocado sobre cada caso; salida por caso en el propio corpus (campo B tras TAB).
-Verificación: 2 generaciones selladas × 2.554 casos, 0 divergencias (total=2554 mismatches=0 en ambas).
-Alcance honesto: sólo -w 4; sólo UTF-8 válido; sólo stdin→stdout sin flags; sin -s/-b/-g/s; sin dicción sobre glibc wcwidth.
-No se promociona etiqueta alguna por fuera del dominio; verificación de terceros: NOT_EXECUTED.
+# soft-hyphen 0xAD→1 (quirk observado), tab→next multiple of 8; col+cp > w ⇔ salto ANTES del cp
+# con contenido previo no vacío; línea "vacía" puede desbordarse (regla sellada por evidencia).
+# verify.sh parametrizado: hasta 8 widths soportadas; esta cubierta: w=1/w=2/w=3/w=4/w=8.
+sha256:41a2d590b6af31f3d8f1d8467ba35ddb59ebd92aa5f44c72d663b71859946a7d  cases_fold_seed20261113.txt  (2.554 id=4, seed 20261113)
+sha256:0e022b21e13be74f450fab9a098d33ca64c6f5f6eb177f973c21170ea0713f52  cases_fold_seed20261114.txt  (2.554 id=4, seed 20261114)
+sha256:aeeb1d7853d72d0609261437b1fe2c95c145a8d4863fa0dda323aecf3c10a575  cases_fold_w1_seed20261115.txt  (1.054 seed 20261115, w=1)
+sha256:8014446d8db6b5bb9ffb5a156b0a7458405bc3ae1c8f10ee699897d505c02308  cases_fold_w2_seed20261116.txt  (1.054 seed 20261116, w=2)
+sha256:e37be1b1ed7c694db47dc2e60185fbc44f0297d1ba5e7351b95609c08b0e4f94  cases_fold_w3_seed20261117.txt  (1.054 seed 20261117, w=3)
+sha256:f86aa8ebea717003496f2871d088249717bcaaa4bd1b80c55100f6110c7bea5d  cases_fold_w8_seed20261122.txt  (1.054 seed 20261122, w=8)
+sha256:827f52fcfadf801d7df926eee26a923dcacc4e008c2c26cebc93dcb23dfe037a  foldwrap.c  (reconstrucción; tabla parametrizada por width en argv[2])
+sha256:eb907ccb734894a6140766c880cea2aaa55233d7e8a52f543cff4948a99826e8  gen_fold_cases.py  (generador parametrizado por width)
+Oráculo: /usr/bin/fold -w N invocado por stdin por caso; salida por caso en el corpus (campo B tras TAB).
+Verificación: 6 regeneraciones (2× w4 + w1 + w2 + w3 + w8), 0 divergencias.
+Alcance honesto: sólo -w N∈{1,2,3,4,8}; sólo UTF-8 válido; sólo stdin→stdout sin flags; sin -s/-b/-g/-t; sin dicción sobre glibc wcwidth; verificación de terceros: NOT_EXECUTED.

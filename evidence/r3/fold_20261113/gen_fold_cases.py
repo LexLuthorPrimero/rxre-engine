@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """gen_fold_cases.py — generador determinista de corpus para R3-fold (etapa 3).
-Emite A y B por linea: A es el texto de entrada escapado; B la salida de fold -w 4 escapada.
-Uso: python3 gen_fold_cases.py <seed> <count>"""
+Emite A y B por linea: A es el texto de entrada escapado; B la salida de fold -w W escapada.
+Uso: python3 gen_fold_cases.py <seed> <count> <out-file> [width]"""
 import random, sys, subprocess
 
 SEED = int(sys.argv[1]) if len(sys.argv) > 1 else 20261113
+W = int(sys.argv[4]) if len(sys.argv) > 4 else 4
 COUNT = int(sys.argv[2]) if len(sys.argv) > 2 else 2500
-W = 4
 rng = random.Random(SEED)
 
 CLASSES = {

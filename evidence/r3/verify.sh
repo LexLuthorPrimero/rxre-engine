@@ -80,7 +80,11 @@ echo "== 11/13 fold — etapa 3 reconstruction vs sealed native oracle (2 gens) 
 gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/foldwrap" fold_20261113/foldwrap.c
 "$TMP/foldwrap" fold_20261113/cases_fold_seed20261113.txt 4
 "$TMP/foldwrap" fold_20261113/cases_fold_seed20261114.txt 4
-echo "fold: 2 generations verified (hashes + differential 0 divergencias)"
+"$TMP/foldwrap" fold_20261113/cases_fold_w1_seed20261115.txt 1
+"$TMP/foldwrap" fold_20261113/cases_fold_w2_seed20261116.txt 2
+"$TMP/foldwrap" fold_20261113/cases_fold_w3_seed20261117.txt 3
+"$TMP/foldwrap" fold_20261113/cases_fold_w8_seed20261122.txt 8
+echo "fold: 6 gated regenerations verified (2x w4 + w1/w2/w3/w8)"
 
 echo "== 12/13 engine test suites =="
 PYTEST_OUT=$(python3 -m pytest \
