@@ -5,16 +5,26 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from pathlib import Path
 from rxre.core.replay import replay_operacion
 
+def _skip_without_db():
+    """La DB de operaciones es privada del autor y NO se distribuye en el paquete público.
+    Sin ella, replay_operacion devuelve status='no_db' — omitir honestamente en vez de fingir."""
+    from pathlib import Path as _P
+    import rxre.core.replay as _r
+    if not _r.DB_PATH.exists():
+        import pytest
+        pytest.skip("rxre.sqlite3 (DB privada del autor) ausente en este entorno; replay no ejecutable aquí")
+
 def test_replay_operacion_real():
-    """PROVEN: replay de operación registrada (binary.inspect) reconstruye resultados."""
+    """PROVEN (host del autor) / SKIP (público): replay de operación registrada."""
+    _skip_without_db()
     res = replay_operacion("op_2939a40bc715d58f")
     assert res["status"] == "replayed", f"Replay debe reconstruir: {res['status']}"
     assert res.get("reproducible") is True, f"Reproducción debe ser posible: {res}"
     assert "replay_result" in res
 
 def test_replay_evidencia_ausente():
-    """PROVEN (adversarial): evidencia canónica ausente debe reportar diferencia."""
-    # No alterar canónica; simular ausencia renombrando temporalmente
+    """PROVEN (host del autor) / SKIP (público): evidencia canónica vinculada al artefacto solicitado."""
+    _skip_without_db()
     repo_root = Path(__file__).resolve().parents[3]
     ev_path = repo_root / "audit" / "evidence" / "e2e_001.json"
     # El replay usa el archivo existente; si no existe, evidencia no encontrada
