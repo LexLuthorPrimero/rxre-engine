@@ -72,7 +72,7 @@ def select_discriminating_inputs(hypotheses: List[RivalHypothesis],
                     disagree += 1
         if disagree:
             scored.append({"input": x, "disagreeing_pairs": disagree, "predictions": preds})
-    scored.sort(key=lambda d: (-d["disagreeing_pairs"], d["input"]))
+    scored.sort(key=lambda d: (-d["disagreeing_pairs"], str(d["input"])))
     return scored
 
 def run_target(binary_path: str, x: bytes, timeout: float = 10.0,
@@ -88,6 +88,11 @@ def run_target(binary_path: str, x: bytes, timeout: float = 10.0,
     except Exception as exc:
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
+def _fmt_input(x):
+    if isinstance(x, (bytes, bytearray)):
+        return x.decode("utf-8", errors="replace")
+    return str(x)
+
 def mente_cycle(hypotheses: List[RivalHypothesis], candidates: List[bytes],
                 target_binary: str, target_runner: Optional[Callable[[bytes], Any]] = None,
                 target_args: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -95,7 +100,7 @@ def mente_cycle(hypotheses: List[RivalHypothesis], candidates: List[bytes],
     report = {
         "target_sha256": _hash(target_binary) if os.path.isfile(target_binary) else None,
         "hypotheses": [h.id for h in hypotheses],
-        "discriminating_candidates": [c["input"].decode("utf-8", errors="replace")
+        "discriminating_candidates": [_fmt_input(c["input"])
                                       for c in select_discriminating_inputs(hypotheses, candidates)],
         "selected": None, "observation": None,
         "refuted": [], "surviving": [],
@@ -141,7 +146,7 @@ def mente_cycle(hypotheses: List[RivalHypothesis], candidates: List[bytes],
         if obs_ok and hv == ov:
             survivors.append(h.id)
         elif obs_ok and hv != ov:
-            h.discriminating_failures.append({"input": x.decode("utf-8", errors="replace"),
+            h.discriminating_failures.append({"input": _fmt_input(x),
                                               "predicted": r["value"],
                                               "observed": observable})
             h.epistemic_status = "REFUTED"
@@ -150,7 +155,7 @@ def mente_cycle(hypotheses: List[RivalHypothesis], candidates: List[bytes],
             indeterminate.append(h.id)
 
     report.update({
-        "selected": {"input": x.decode("utf-8", errors="replace"),
+        "selected": {"input": _fmt_input(x),
                      "arguments": target_args or [],
                      "disagreeing_pairs": best["disagreeing_pairs"]},
         "observation": obs,

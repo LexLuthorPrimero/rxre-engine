@@ -18,7 +18,7 @@ Empléala como guion de una única ejecución; adjúntala a tu dictamen si la us
 - [ ] `./verify.sh` (cleanroom) o `sh evidence/r3/verify.sh` (engine)
 - [ ] Observar el fail-closed: identidad nativa pasa antes de cualquier salto
 - [ ] Capturar salida completa (no truncada) — archivo `auditor_<fecha>.log`
-- [ ] Engine solamente: observar `60 passed, 2 skipped` (los skips son los 2 tests que exigen la DB privada del autor, deliberadamente no distribuida)
+- [ ] Engine solamente: observar `63 passed, 2 skipped` (los skips son los 2 tests que exigen la DB privada del autor, deliberadamente no distribuida)
 - [ ] Si algo diverge → ir a D (triage)
 
 ## C. Cierre (dictamen)
