@@ -34,6 +34,8 @@ Only two targets exist, with sealed evidence inside `evidence/r3/`:
 Details, logs and matrices live in `evidence/r3/` (`EXPEDIENTE_R3.md` is the full
 case file — Spanish).
 
+## New here? Read [`QUICKSTART.md`](QUICKSTART.md) first (15 minutes, verification-first).
+
 ## Verify it yourself — one command
 
 ```sh
