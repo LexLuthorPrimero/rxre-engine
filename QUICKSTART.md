@@ -27,7 +27,7 @@ por terceros (`NOT_EXECUTED`; PUERTA condición 3 en `PENDING_EXTERNAL_REVIEWER`
 sh evidence/r3/verify.sh
 ```
 
-Esperado al final: `VERIFY: all steps passed` (63 passed, 2 skipped en clon
+Esperado al final: `VERIFY: all steps passed` (66 passed, 2 skipped en clon
 público — los 2 skips son tests que requieren la DB privada del autor, no
 distribuida; ver `test_replay_mision.py`). Requisitos: Linux x86_64, `gcc`,
 `python3` (≥3.10), `pytest`, GNU coreutils cuyos binarios coincidan con los

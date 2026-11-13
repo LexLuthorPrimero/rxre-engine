@@ -52,7 +52,7 @@ the **i18n black-box**, and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
 bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
-twelve `total=… mismatches=0` lines for `wc`, `63 passed, 2 skipped` (the 2 skips
+twelve `total=… mismatches=0` lines for `wc`, `66 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
@@ -107,8 +107,8 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - English entry points: this README, `GLOSSARY.md`
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
-- Sibling public package: `rxre-cleanroom` [v1.3.5](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.3.5) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.3.5 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.5) (`rxre-engine-1.3.5.zip`; current — adds **MENTE etapa 2**: sealed-data dry run on the filenvercmp corpus + BYTES/CODEPOINTS/WCWIDTH rival experiment on sealed wc `-L` data; verify gate `63 passed, 2 skipped`). Superseded snapshots kept byte-exact: [v1.3.4](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.4) (MENTE etapa 1), [v1.3.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.3) (round-3 audit closure), [v1.3.2](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.2) (F1–F4 + Phase 5).
+- Sibling public package: `rxre-cleanroom` [v1.3.6](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.3.6) — same brother-in-arms, aligned release; commended to the same blind-verification call.
+- Own auditable snapshot: [v1.3.6 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.6) (`rxre-engine-1.3.6.zip`; current — MENTE etapa 2 ×2: sealed-data dry run on filenvercmp corpus **and** three-way rival refutation experiment on sealed wc `-L` UTF-8 data (independent EAW model matches sealed oracle 1523/1523); verify gate `66 passed, 2 skipped`). Superseded snapshots kept byte-exact: [v1.3.5](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.5) (stage-2 dry run; superseded — see Update-14), [v1.3.4](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.4) (stage 1), [v1.3.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.3) (round-3 closure), [v1.3.2](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.2) (F1–F4 + Phase 5).
 
 ## License & authorship
 
