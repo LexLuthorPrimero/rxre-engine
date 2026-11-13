@@ -108,7 +108,7 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
 - Sibling public package: `rxre-cleanroom` [v1.3.0](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.3.0) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.3.1 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.1) (`rxre-engine-1.3.1.zip`; endurecimiento de las fases F1–F4 de la auditoría estática — gate de evidencia estricto, replay con `blocked_insufficient_identity` + `equivalence`, verify gate `49 passed, 2 skipped`; verify with `sh evidence/r3/verify.sh`). Superseded snapshot kept byte-exact: [v1.3.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.0) (`3ded096`). Previous snapshot: [v1.0.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.0.0) (`356cfb0`).
+- Own auditable snapshot: [v1.3.2 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.2) (`rxre-engine-1.3.2.zip`; current — audit-hardening F1–F4 **plus** Phase 5 decoupling of historical ls/grep knowledge into hash-bound profiles; verify gate `49 passed, 2 skipped`). Superseded snapshots kept byte-exact: [v1.3.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.1) (F1–F4 only, `ffeba91`), [v1.3.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.0) (`3ded096`). Previous snapshot: [v1.0.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.0.0) (`356cfb0`).
 
 ## License & authorship
 
