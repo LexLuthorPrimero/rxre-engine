@@ -52,7 +52,7 @@ the **i18n black-box**, and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
 bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
-twelve `total=… mismatches=0` lines for `wc`, `52 passed, 2 skipped` (the 2 skips
+twelve `total=… mismatches=0` lines for `wc`, `60 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
@@ -108,7 +108,7 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
 - Sibling public package: `rxre-cleanroom` [v1.3.3](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.3.3) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.3.3 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.3) (`rxre-engine-1.3.3.zip`; current — audit-hardening F1–F4 **plus** Phase 5 **plus** round-3 audit closure: F1 semantic-content gate, F2 full-tree equivalence, F3 explicit `condition_satisfied`, global timeout budget, eligible-denominator coverage, `_rizin_cfg` seam, Dockerfile digest-pinned, verify.sh fail-closed pin (expects `52 passed, 2 skipped`)). Superseded snapshots kept byte-exact: [v1.3.2](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.2) (F1–F4 + Phase 5), [v1.3.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.1) (F1–F4 only, `ffeba91`), [v1.3.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.0) (`3ded096`). Previous snapshot: [v1.0.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.0.0) (`356cfb0`).
+- Own auditable snapshot: [v1.3.3 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.3) (`rxre-engine-1.3.3.zip`; current — audit-hardening F1–F4 **plus** Phase 5 **plus** round-3 audit closure: F1 semantic-content gate, F2 full-tree equivalence, F3 explicit `condition_satisfied`, global timeout budget, eligible-denominator coverage, `_rizin_cfg` seam, Dockerfile digest-pinned, verify.sh fail-closed pin (expects `60 passed, 2 skipped`)). Superseded snapshots kept byte-exact: [v1.3.2](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.2) (F1–F4 + Phase 5), [v1.3.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.1) (F1–F4 only, `ffeba91`), [v1.3.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.0) (`3ded096`). Previous snapshot: [v1.0.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.0.0) (`356cfb0`).
 
 ## License & authorship
 
