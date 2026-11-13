@@ -5,6 +5,10 @@
 # Targets (read-only oracles, binaries never modified):
 #   /usr/bin/ls  sha256 54e936d37decdad9ecaf189b1de347605a0a99037ec87bd17679b6cbde871a0c  BuildID ae6605eeca6cc2f19d18fdd53a521e501df3456d
 #   /usr/bin/wc  sha256 81d614595c717be908fce809713702efd35ce5a56f5ab7cbc497d1a61eb1a38f  BuildID 07a56ef5bcfd9b400c0dc0441530607b3c7d65f8
+#   /usr/bin/fold  sha256 9503046131ed5070acca13388497241d213cb8d7f9d096fd1dcecacd0bc325d7  BuildID b788dd85d895b9f89f2b9cf90f4e3b5c314c5c5b
+#   /usr/bin/tr    sha256 b1d1bfbe1c28c8866c993b35745ada4bdd47fe53e4d5cf5d5450ca460b8cfce6  BuildID 40bbf84361ef4293bf5d55cc1628df17179f7c70
+#   /usr/bin/dirname  sha256 aac6a889dcfe1bcaabdcfea17b89c643c29abee5efce3fafbbb0c34b70e864a7  BuildID 4bc17061a5bf2c928f018442a34c65cec96d07a7
+#   /usr/bin/basename sha256 1ef9913961b3006d8d5f41718035a8ef7aedcf5f81da46100dffa61421989621  BuildID eb755c71c52c5282f84d01ae80ba24e6f0a5e060
 # Toolchain on this host: gcc (GCC) 16.2.1 20260819 (Red Hat 16.2.1-2)
 # Build flags used by verify.sh: -std=c11 (wc additionally -Wall -Wextra -Werror -pedantic) -O2
 # Distinct artifact identities (hashes below over file contents only):
@@ -12,7 +16,7 @@
 #   wc reconstruction (wc_recon_m10) 36ecfd7ec21da07f11883e8d2a94747b24e60ecb1e4ba636405ebc30a668d479
 #   harness verify2        904cfdac4538f9e80ef5ea4c119b2809b295a728ff88e99815d33182013cfbfb
 #   width table (generated) 7f96aa2b61fa86697d5ade0eae87888773b07dacab9598f9382db2f6b55125d0
-# Seals & milestones: 2 generations filenvercmp (35 files), wc 11 corpora
+# Seals & milestones: filenvercmp (2 generations + challenge + locale + i18n), wc 11 corpora, fold 6 regenerations, tr 2 generations, dirname 2 generations, basename 2 generations
 # Deliberately excluded: matrix_native_m.txt (zero bytes; abandoned early -m attempt kept for history; hito 7 uses wc -m==-c in C)
 80ed5336a025c6ebc16b5c19c9e35cfb7fcf5bd2591452c2f9c35188ebd972d1  challenge_cr_20261126/cases_challenge_seed20261126.txt
 28e6de9f55070ec997caf1687ab940084d346b9b52a42fc5a67901a4cd8363a1  challenge_cr_20261126/cases_challenge_b_seed20261126.txt
@@ -75,3 +79,8 @@ c837c82199612641cb6b661b19a4c1a6d18ee8e32ce03bc50956461aab3f3893  wc/matrix_high
 545c469fbed14f3d6622366ac1b713e5186d08627dc9e11be9897e0e6f32d29f  wc/matrix_native_L_utf8.txt
 717edeb65a41557d6701dbd10bd52dc86e238dddb9ab9edb2f1d2be9a227c604  wc/cases_flags_utf8_seed20261125.txt
 29cfa79734977bbcb34e3232972bcc6064e32034cc3a1a47e5c15f9b0c37b21a  wc/matrix_flags_utf8.txt
+c159d8ec3d955237c7d3fe7463b23b12dfb5435a445779de4213dd751d1cb99d  basename_20261114/cases_basename_seed20261114.txt
+ac1a53730108f292c2f8d3c074eb4851a3dc89dc52efac8b8c43ab20461c020b  basename_20261114/cases_basename_seed20261115.txt
+f83aab19ab7a63bcd582b58fbdad86b947c5b58c38ec5ef37ed90867fb5241ae  basename_20261114/gen_basecases.py
+56a18d4ddb3f7772497a107c3732158c9e2645e06e27ddf7172e9d2ce23c562c  basename_20261114/basewrap.c
+a7245f39468c1e832f8096f3b255c2715587ff8c3fda226b7b83a660f5dea0f7  basename_20261114/SEAL.txt

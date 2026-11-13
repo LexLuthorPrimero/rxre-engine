@@ -7,7 +7,7 @@ síntoma).
 ## Qué es esto (y qué no)
 
 Es un motor experimental de ingeniería inversa asistido por IA. Lo único que el
-repositorio **puede demostrar hoy** son cinco reconstrucciones acotadas con evidencia
+repositorio **puede demostrar hoy** son seis reconstrucciones acotadas con evidencia
 diferencial sellada (todas contra los binarios nativos de GNU coreutils 9.10):
 
 - `filenvercmp` sobre `/usr/bin/ls` (`sort=version`). **34.145 × 2** generaciones +
@@ -21,6 +21,8 @@ diferencial sellada (todas contra los binarios nativos de GNU coreutils 9.10):
   `/usr/bin/tr`.
 - `dirname` (padre de directorio acotado) — 1.917 / 1.901 generaciones. **0 divergencias**
   vs `/usr/bin/dirname`.
+- `basename` (último componente acotado) — 1.987 / 2.013 generaciones. **0 divergencias**
+  vs `/usr/bin/basename`.
 
 No es un producto, no es un descompilador general, no autoriza acceso a hardware
 (sin `/dev/mem`, sysfs, debugfs, UMR, root, sudo) y no afirma verificación por
@@ -32,12 +34,12 @@ terceros (`NOT_EXECUTED`; PUERTA condición 3 en `PENDING_EXTERNAL_REVIEWER`).
 sh evidence/r3/verify.sh
 ```
 
-Esperado al final: `VERIFY: all steps passed` (78 passed, 2 skipped en clon
+Esperado al final: `VERIFY: all steps passed` (80 passed, 2 skipped en clon
 público; los 2 skips son tests que requieren la DB privada del autor, no
 distribuida; ver `test_replay_mision.py`). Requisitos: Linux x86_64, `gcc`,
-`sha256sum`, `python3` (≥3.10), `pytest`. `verify.sh` ejecuta 15 etapas; cada
+`sha256sum`, `python3` (≥3.10), `pytest`. `verify.sh` ejecuta 16 etapas; cada
 binario nativo se verifica por identidad SHA-256 fail-closed antes de cualquier
-usado (`ls`, `wc`, `fold`, `tr`, `dirname`).
+usado (`ls`, `wc`, `fold`, `tr`, `dirname`, `basename`).
 
 ## Mapa de lectura (en orden)
 
@@ -72,7 +74,7 @@ significa lo que la evidencia anexa demuestra — nunca una capacidad general.
 Corre el verificador en un clon **limpio** y en una máquina distinta (toda la
 evidencia sigue siendo del mismo host/UID; eso es exactamente lo que falta para
 cerrar la puerta). O genera un corpus adversarial contra `fold`/`tr`/`dirname`
-(o `wc`) e infrinje el resultado vía issue. Un contraejemplo verdadero vale más
+(o `wc`, `dirname`, `basename`) y refuta el resultado vía issue. Un contraejemplo verdadero vale más
 que diez auditorías amables.
 
 ## Límites duros (no negociables)

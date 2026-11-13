@@ -24,7 +24,7 @@ about 2 minutes, needs only gcc/sha256sum/pytest). MIT.
 
 ## What is actually verified
 
-Only five targets exist, with sealed evidence inside `evidence/r3/`:
+Only six targets exist, with sealed evidence inside `evidence/r3/`:
 
 | Target | Artifact | Corpus | Result |
 |---|---|---|---|
@@ -33,6 +33,7 @@ Only five targets exist, with sealed evidence inside `evidence/r3/`:
 | fold in /usr/bin/fold — sha256 95030461... | property reconstruction (line-wrap width) | 2 sealed generations (2.554 each, -w 4, seeds 20261113/14) + gated w=1/2/3/8 corpora (1.054 each; 6 gated regenerations); valid UTF-8 only; byte-exact vs native `/usr/bin/fold -w N` | ok 0 divergences vs native GNU |
 | tr in /usr/bin/tr — sha256 b1d1bfbe... | property reconstruction (squeeze of byte-x runs, `tr -s x`) | 2 sealed generations (2.513 each, seeds 20261113/14); byte-exact vs native `/usr/bin/tr -s x` with harness over stdin | ok 0 divergences vs native GNU |
 | dirname in /usr/bin/dirname — sha256 aac6a889... | property reconstruction (parent directory, bounded) | 2 sealed generations (1.917/1.901, seeds 20261113/14); byte-exact vs native `/usr/bin/dirname` with harness over stdin | ok 0 divergences vs native GNU |
+| basename in /usr/bin/basename — sha256 1ef99139... | property reconstruction (last component, bounded) | 2 sealed generations (1.987/2.013, seeds 20261114/15); byte-exact vs native `/usr/bin/basename` with harness over stdin | ok 0 divergences vs native GNU |
 
 Details, logs and matrices live in `evidence/r3/` (`EXPEDIENTE_R3.md` is the full
 case file — Spanish).
@@ -45,18 +46,18 @@ case file — Spanish).
 sh evidence/r3/verify.sh
 ```
 
-One command; it checks the **SHA-256 of 60 sealed artifacts** against their
+One command; it checks the **SHA-256 of 65 sealed artifacts** against their
 manifest, verifies the identity of the native reference binaries
-(`/usr/bin/ls`, `/usr/bin/wc`, `/usr/bin/fold`; fail-closed), rebuilds the reconstruction, and re-runs the differential
+(`/usr/bin/ls`, `/usr/bin/wc`, `/usr/bin/fold`, `/usr/bin/tr`, `/usr/bin/dirname`, `/usr/bin/basename`; fail-closed), rebuilds the reconstruction, and re-runs the differential
 comparison on **both generations of `filenvercmp` (34,145 × 2)** plus
 the **challenge corpus (3,100 + 141 deliberately identical a==b = 3,241 cases)**,
 the **locale-invariance test**,
 the **i18n black-box**, the **fold property reconstruction** (2 sealed generations, byte-exact), and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
-bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
+bytes/chars/-L/flags), the **dirname** and **basename** property reproductions (2 sealed generations each, byte-exact), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
 two `total=2554 mismatches=0` lines for **fold**,
-twelve `total=… mismatches=0` lines for `wc`, `78 passed, 2 skipped` (the 2 skips
+twelve `total=… mismatches=0` lines for `wc`, two `total=1917/1901` lines for **dirname**, two `total=1987/2013` lines for **basename**, `80 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
@@ -111,8 +112,8 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - English entry points: this README, `GLOSSARY.md`
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
-- Sibling public package: `rxre-cleanroom` [v1.5.3](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.5.3) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.6.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.6.0) (`rxre-engine-1.6.0.zip`; current — **FIVE bounded targets sealed**: filenvercmp, wc, fold, tr, **and dirname**; verify gate `78 passed, 2 skipped`; 15 stages; 60-artefact manifest). Superseded snapshots kept byte-exact: [v1.5.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.3) (transparency/content fix), [v1.5.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.1), [v1.5.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.0) (FIVE targets + transparency), [v1.4.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.4.0) (FOUR targets), [v1.3.10](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.10), [v1.3.9](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.9), [v1.3.8](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.8).
+- Sibling public package: `rxre-cleanroom` [v1.8.0](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.8.0) — same brother-in-arms, aligned release; commended to the same blind-verification call.
+- Own auditable snapshot: [v1.8.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.8.0) (`rxre-engine-1.8.0.zip`; current published snapshot — **FIVE bounded targets sealed**: filenvercmp, wc, fold, tr, **and dirname**; verify gate `78 passed, 2 skipped`; 15 stages; 60-artefact manifest). The v1.9.0 candidate in this tree adds **basename** (sixth bounded target; 65-artefact manifest; 16 stages; `80 passed, 2 skipped`) and is **not tagged/published until the owner authorizes it**. Superseded snapshots kept byte-exact: [v1.5.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.3) (transparency/content fix), [v1.5.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.1), [v1.5.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.0) (FIVE targets + transparency), [v1.4.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.4.0) (FOUR targets), [v1.3.10](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.10), [v1.3.9](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.9), [v1.3.8](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.8).
 
 ## License & authorship
 

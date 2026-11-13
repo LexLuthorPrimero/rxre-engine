@@ -12,13 +12,17 @@ cat /etc/os-release 2>/dev/null | head -3
 gcc --version | head -1
 python3 --version
 gcc -v 2>&1 | tail -1
-sha256sum /usr/bin/ls /usr/bin/wc
+sha256sum /usr/bin/ls /usr/bin/wc /usr/bin/fold /usr/bin/tr /usr/bin/dirname /usr/bin/basename
 locale -a 2>/dev/null | grep -E '^(C)\.?$|es_AR\.utf8|C\.UTF-8' | head
 ```
 
 Referencia sellada (si difiere, la cadena con oráculo nativo no aplica):
 `/usr/bin/ls` = `54e936d37decdad9ecaf189b1de347605a0a99037ec87bd17679b6cbde871a0c`
 `/usr/bin/wc` = `81d614595c717be908fce809713702efd35ce5a56f5ab7cbc497d1a61eb1a38f`
+`/usr/bin/fold` = `9503046131ed5070acca13388497241d213cb8d7f9d096fd1dcecacd0bc325d7`
+`/usr/bin/tr` = `b1d1bfbe1c28c8866c993b35745ada4bdd47fe53e4d5cf5d5450ca460b8cfce6`
+`/usr/bin/dirname` = `aac6a889dcfe1bcaabdcfea17b89c643c29abee5efce3fafbbb0c34b70e864a7`
+`/usr/bin/basename` = `1ef9913961b3006d8d5f41718035a8ef7aedcf5f81da46100dffa61421989621`
 
 ## 1. Clon y commit
 
@@ -35,12 +39,13 @@ sha256sum -c evidence/r3/SHA256SUMS   # si existe en esta versión; si no, verif
 sh evidence/r3/verify.sh
 ```
 
-`verify.sh` ejecuta, en orden fail-closed: (1) manifiesto sellado (47 artefactos),
-(2) identidad nativa de `ls`/`wc`, (3–4) build + diferencial de las dos
-generaciones (34.145×2), (5) challenge corpus (3.100 + 3.241), (6) invariancia
-de locale, (7) i18n black-box, (8–10) wc en `LC_ALL=C` y `es_AR.utf8` (11 corpora),
-(11) suite pytest (78 passed, 2 skipped en clon público), (12) resumen.
-Cola esperada: `VERIFY: all steps passed`.
+`verify.sh` ejecuta, en orden fail-closed: (1) manifiesto sellado (65 artefactos),
+(2) identidad nativa de `ls`/`wc`/`fold`/`tr`/`dirname`/`basename`, (3–7) build +
+diferencial de `filenvercmp` (dos generaciones 34.145×2, challenge corpus
+3.100 + 3.241, invariancia de locale, i18n black-box), (8–10) los 11 corpora de
+`wc` en `LC_ALL=C` y `es_AR.utf8`, (11) fold (6 regeneraciones), (12) tr,
+(13) dirname, (14) basename, (15) suite pytest (80 passed, 2 skipped en clon
+público), (16) resumen. Cola esperada: `VERIFY: all steps passed`.
 
 ## 3. Qué comprobar tú mismo (no te lo crea nadie, ni el autor)
 

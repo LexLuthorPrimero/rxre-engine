@@ -1,5 +1,5 @@
 #!/bin/sh
-# RXRE-R3 self-contained verification — five bounded targets.
+# RXRE-R3 self-contained verification — six bounded targets.
 # One command; seals + builds + differential + suites. No sibling repo needed.
 # Requires: gcc, sha256sum, sh, python3 + pytest.
 set -e
@@ -7,10 +7,10 @@ cd "$(dirname "$0")"
 R3=$(pwd)
 ROOT="$R3/../.."
 
-echo "== 1/15 sealed manifest integrity (SHA-256 list) =="
+echo "== 1/16 sealed manifest integrity (SHA-256 list) =="
 sha256sum -c manifest.txt
 
-echo "== 2/15 native binary identity (fail-closed) =="
+echo "== 2/16 native binary identity (fail-closed) =="
 LS_SHA=$(sha256sum /usr/bin/ls 2>/dev/null | awk '{print $1}')
 WC_SHA=$(sha256sum /usr/bin/wc 2>/dev/null | awk '{print $1}')
 LS_ID=54e936d37decdad9ecaf189b1de347605a0a99037ec87bd17679b6cbde871a0c
@@ -36,42 +36,47 @@ DIRNAME_ID=aac6a889dcfe1bcaabdcfea17b89c643c29abee5efce3fafbbb0c34b70e864a7
 if [ "$DIRNAME_SHA" != "$DIRNAME_ID" ]; then
   echo "FAIL-CLOSED: /usr/bin/dirname sha256=$DIRNAME_SHA (expected $DIRNAME_ID) - refuse to certify oracle" >&2; exit 4
 fi
-echo "native identity OK: /usr/bin/ls=$LS_SHA /usr/bin/wc=$WC_SHA /usr/bin/fold=$FOLD_SHA /usr/bin/tr=$TR_SHA /usr/bin/dirname=$DIRNAME_SHA"
+BASENAME_SHA=$(sha256sum /usr/bin/basename 2>/dev/null | awk '{print $1}')
+BASENAME_ID=1ef9913961b3006d8d5f41718035a8ef7aedcf5f81da46100dffa61421989621
+if [ "$BASENAME_SHA" != "$BASENAME_ID" ]; then
+  echo "FAIL-CLOSED: /usr/bin/basename sha256=$BASENAME_SHA (expected $BASENAME_ID) - refuse to certify oracle" >&2; exit 4
+fi
+echo "native identity OK: /usr/bin/ls=$LS_SHA /usr/bin/wc=$WC_SHA /usr/bin/fold=$FOLD_SHA /usr/bin/tr=$TR_SHA /usr/bin/dirname=$DIRNAME_SHA /usr/bin/basename=$BASENAME_SHA"
 
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 
-echo "== 3/15 filenvercmp build =="
+echo "== 3/16 filenvercmp build =="
 gcc -std=c11 -O2 -o "$TMP/verify2" verify2.c reconstruction/filenvercmp.c
 
-echo "== 4/15 filenvercmp generations vs native oracle =="
+echo "== 4/16 filenvercmp generations vs native oracle =="
 "$TMP/verify2" oracle/cases_seed20261112.txt oracle/matrix_native.txt
 "$TMP/verify2" oracle/cases_seed20261113.txt oracle/matrix_native_20261113.txt
 
 
-echo "== 5/15 filenvercmp challenge corpus (adversarial) =="
+echo "== 5/16 filenvercmp challenge corpus (adversarial) =="
 "$TMP/verify2" challenge_cr_20261126/cases_challenge_seed20261126.txt challenge_cr_20261126/matrix_challenge.txt
 "$TMP/verify2" challenge_cr_20261126/cases_challenge_b_seed20261126.txt challenge_cr_20261126/matrix_challenge_b.txt
 
-echo "== 6/15 filenvercmp locale-invariance (C ≡ es_AR.utf8, double generation) =="
+echo "== 6/16 filenvercmp locale-invariance (C ≡ es_AR.utf8, double generation) =="
 cmp oracle/matrix_native.txt hito14_locale/matrix_native_es_AR_utf8.txt
 cmp oracle/matrix_native_20261113.txt hito14_locale/matrix_native_es_AR_utf8_20261113.txt
 echo "locale invariance OK (gen1, gen2 byte-equal)"
 
-echo "== 7/15 filenvercmp i18n black-box (200 UTF-8 names vs native ls -v) =="
+echo "== 7/16 filenvercmp i18n black-box (200 UTF-8 names vs native ls -v) =="
 gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -I reconstructed/ -o "$TMP/sort_names" filenvercmp_i18n_20261126/sort_names.c reconstruction/filenvercmp.c
 "$TMP/sort_names" filenvercmp_i18n_20261126/names_i18n.txt > "$TMP/i18n.out"
 cmp "$TMP/i18n.out" filenvercmp_i18n_20261126/oracle_lsAv_i18n.txt
 cmp "$TMP/i18n.out" filenvercmp_i18n_20261126/reconstructed_sorted_i18n.txt
 echo "i18n black-box OK (byte-identical sorted sequence)"
 
-echo "== 8/15 wc build (C baseline + utf8 paths) =="
+echo "== 8/16 wc build (C baseline + utf8 paths) =="
 gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -o "$TMP/verify_wc" wc/verify_wc.c wc/wc_recon_m10.c
 gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -o "$TMP/verify_wcflags" wc/verify_wcflags.c wc/wc_recon_m10.c
 gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -o "$TMP/verify_m"  wc/verify_m.c  wc/wc_recon_m10.c
 gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -o "$TMP/verify_L"  wc/verify_L.c  wc/wc_recon_m10.c
 gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -o "$TMP/verify_fu" wc/verify_flags_u8.c wc/wc_recon_m10.c
 
-echo "== 9/15 wc — LC_ALL=C =="
+echo "== 9/16 wc — LC_ALL=C =="
 LC_ALL=C "$TMP/verify_wc" wc/cases_seed20261114.txt        wc/matrix_native_wc.txt
 LC_ALL=C "$TMP/verify_wc" wc/cases_seed20261115.txt        wc/matrix_native_wc_20261115.txt
 LC_ALL=C "$TMP/verify_wcflags" wc/cases_wcflags_seed20261116.txt wc/matrix_native_wcflags.txt
@@ -79,14 +84,14 @@ LC_ALL=C "$TMP/verify_wcflags" wc/cases_wcL_seed20261117.txt    wc/matrix_native
 LC_ALL=C "$TMP/verify_wc" wc/cases_high_seed20261118.txt   wc/matrix_high_LC_ALL=C.txt
 LC_ALL=C "$TMP/verify_wc" wc/cases_highutf8_seed20261120.txt wc/matrix_highutf8_C.txt
 
-echo "== 10/15 wc — es_AR.utf8 =="
+echo "== 10/16 wc — es_AR.utf8 =="
 LC_ALL=es_AR.utf8 "$TMP/verify_wc" wc/cases_high_seed20261118.txt   wc/matrix_high_esAR.txt
 LC_ALL=es_AR.utf8 "$TMP/verify_wc" wc/cases_highutf8_seed20261120.txt wc/matrix_highutf8.txt
 LC_ALL=es_AR.utf8 "$TMP/verify_m"  wc/cases_m_utf8_seed20261121.txt wc/matrix_native_m_utf8.txt utf8
 LC_ALL=es_AR.utf8 "$TMP/verify_L"  wc/cases_L_utf8_seed20261123.txt wc/matrix_native_L_utf8.txt utf8
 LC_ALL=es_AR.utf8 "$TMP/verify_fu" wc/cases_flags_utf8_seed20261125.txt wc/matrix_flags_utf8.txt utf8
 
-echo "== 11/15 fold — etapa 3 reconstruction vs sealed native oracle (2 gens) =="
+echo "== 11/16 fold — etapa 3 reconstruction vs sealed native oracle (2 gens) =="
 gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/foldwrap" fold_20261113/foldwrap.c
 "$TMP/foldwrap" fold_20261113/cases_fold_seed20261113.txt 4
 "$TMP/foldwrap" fold_20261113/cases_fold_seed20261114.txt 4
@@ -96,19 +101,22 @@ gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/foldwrap" fold_20261113/foldwrap
 "$TMP/foldwrap" fold_20261113/cases_fold_w8_seed20261122.txt 8
 echo "fold: 6 gated regenerations verified (2x w4 + w1/w2/w3/w8)"
 
-echo "== 12/15 tr — etapa 5 reconstruction vs sealed native oracle (2 gens) =="
-
-echo "== 12/15 tr — etapa 5 reconstruction vs sealed native oracle (2 gens) =="
+echo "== 12/16 tr — etapa 5 reconstruction vs sealed native oracle (2 gens) =="
 gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/trwrap" tr_20261113/trwrap.c
 "$TMP/trwrap" tr_20261113/cases_tr_seed20261113.txt verify
 "$TMP/trwrap" tr_20261113/cases_tr_seed20261114.txt verify
 
-echo "== 13/15 dirname — etapa 5-bis reconstruction vs sealed native oracle (2 gens) =="
+echo "== 13/16 dirname — etapa 5-bis reconstruction vs sealed native oracle (2 gens) =="
 gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/denwrap" dirname_20261113/denwrap.c
 "$TMP/denwrap" dirname_20261113/cases_dirname_seed20261113.txt verify
 "$TMP/denwrap" dirname_20261113/cases_dirname_seed20261114.txt verify
 
-echo "== 14/15 engine test suites =="
+echo "== 14/16 basename — etapa 6 reconstruction vs sealed native oracle (2 gens) =="
+gcc -std=c11 -Wall -Wextra -Werror -O2 -o "$TMP/basewrap" basename_20261114/basewrap.c
+"$TMP/basewrap" basename_20261114/cases_basename_seed20261114.txt verify
+"$TMP/basewrap" basename_20261114/cases_basename_seed20261115.txt verify
+
+echo "== 15/16 engine test suites =="
 PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_integridad_adv_final.py" \
   "$ROOT/tools/rxre/tests/test_contrato_uniforme.py" \
@@ -124,11 +132,12 @@ PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_mente_fold_rivals.py" \
   "$ROOT/tools/rxre/tests/test_discovery_unknown.py" \
   "$ROOT/tools/rxre/tests/test_discovery_on_dirname.py" \
+  "$ROOT/tools/rxre/tests/test_discovery_on_basename.py" \
   "$ROOT/tools/rxre/tests/test_discovery_loopbench.py" \
   "$ROOT/tools/rxre/tests/test_discovery_synthesis.py" -q)
 printf '%s\n' "$PYTEST_OUT"
 PYTEST_COUNT=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ passed' | awk '{print $1}')
-EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-78}"
+EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-80}"
 EXPECT_SKIPPED="${RXRE_ENGINE_EXPECT_SKIPPED:-2}"
 ACTUAL_SKIPPED=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ skipped' | awk '{print $1}')
 ACTUAL_SKIPPED=${ACTUAL_SKIPPED:-0}
@@ -138,12 +147,13 @@ if [ "$PYTEST_COUNT" != "$EXPECT_PASSED" ] || [ "$ACTUAL_SKIPPED" != "$EXPECT_SK
   exit 5
 fi
 
-echo "== 15/15 coverage summary =="
+echo "== 16/16 coverage summary =="
 echo "filenvercmp: 4 sealed runs (2 generations + challenge corpus + locale invariance + i18n black-box) — all byte-exact"
 echo "wc: 11 corpora verified (C + es_AR.utf8; -m/-L/flags subtests)"
 echo "fold: 6 gated regenerations verified — all byte-exact"
 echo "tr: 2 generations verified (squeeze, -s x) — all byte-exact"
 echo "dirname: 2 generations verified (parent directory) — all byte-exact"
+echo "basename: 2 generations verified (last component) — all byte-exact"
 echo "engine: ${PYTEST_COUNT} pytest tests passed (count reported by pytest itself)"
 echo ""
-echo "== 15/15 VERIFY: all steps passed =="
+echo "== 16/16 VERIFY: all steps passed =="

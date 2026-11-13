@@ -1,0 +1,15 @@
+# R3 — basename (GNU coreutils 9.10 /usr/bin/basename, Fedora 44 fc44) — milestone etapa 6
+# Identidad nativa (fail-closed; valor de verificacion = valor del host):
+#   /usr/bin/basename = sha256:1ef9913961b3006d8d5f41718035a8ef7aedcf5f81da46100dffa61421989621  (coreutils-9.10-5.fc44.x86_64)
+# Objetivo de la etapa: reconstruir UNA propiedad acotada — ultimo componente acotado.
+# Algoritmo sellado (hipotesis previa a la reconstruccion): strip trailing slashes; if all stripped
+#   and leading slash: "/"; if all stripped and no leading slash: "."; else component after last '/'
+#   (the whole stripped string if there is no '/'). '.', '..' y literales similares se tratan como
+#   componentes normales (no se resuelven semanticamente). Sin flags, sin operando sufijo, sin -a.
+# Corpus sellado ANTES de hipotesis: gen_basecases.py, seeds 20261114/15; 1987/2013 casos, incl UTF-8 wide chars.
+# verify.sh stage 14/16. basewrap.c = 56a18d4ddb3f7772497a107c3732158c9e2645e06e27ddf7172e9d2ce23c562c (included below). Verificacion in-example por subproceso /usr/bin/basename.
+# Alcance honesto: solo ruta path (sin flags, sin sufijo); sin diccionario general de basename; demo de reconstruccion por propiedad.
+sha256:c159d8ec3d955237c7d3fe7463b23b12dfb5435a445779de4213dd751d1cb99d  cases_basename_seed20261114.txt
+sha256:ac1a53730108f292c2f8d3c074eb4851a3dc89dc52efac8b8c43ab20461c020b  cases_basename_seed20261115.txt
+sha256:f83aab19ab7a63bcd582b58fbdad86b947c5b58c38ec5ef37ed90867fb5241ae  gen_basecases.py
+sha256:56a18d4ddb3f7772497a107c3732158c9e2645e06e27ddf7172e9d2ce23c562c  basewrap.c
