@@ -1,6 +1,8 @@
 # EXPEDIENTE R3 — Cadena E2E de reconstrucción semántica de filenvercmp/filevercmp sobre /usr/bin/ls (2026-11-12)
 
 **Estado: OPEN — cero divergencias en ambas generaciones selladas (update-5, 2026-11-12); sin dictamen PASS de tercera parte.**
+**Update-7 (2026-11-13):** verificación extendida — añade comprobación de identidad SHA-256 de los binarios nativos (fail-closed) antes de cualquier salto, incorpora el challenge corpus (3.100+141 casos, todos `mismatches=0`), el test de invariancia de locale (C ≡ es_AR.utf8, 2×34.145 byte-identical), el i18n black-box (200 nombres UTF-8 vs `ls -v` nativo; sort_names compiled from the reconstruction,byte-comparadas al snapshot del oráculo), y el número real de tests pytest (20) y no uno inscrito a mano. El manifiesto sellado ahora vincula 42 artefactos.
+
 **Update-6 (2026-11-13):** verificación unificada en un único comando: `sh evidence/r3/verify.sh` — 32 artefactos sellados vs `manifest.txt`, filenvercmp (2×34.145) + wc (11 corpora) + 12/12 suites Python. Las 791 divergencias originales fueron resueltas (reconstrucción por transcripción literal del desensamblado) y verificadas en dos generaciones selladas (34.145 + 34.145 casos), 3 toolchains y sandbox bwrap. No se habilita producción ni generalización; la verificación autónoma de terceros (fuera de este host/autor) permanece NOT_EXECUTED.
 
 ## 1. Objetivo y alcance

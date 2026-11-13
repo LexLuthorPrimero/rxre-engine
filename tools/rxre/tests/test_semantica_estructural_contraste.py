@@ -26,7 +26,8 @@ def test_e2e_010_gate():
     """PROVEN: evidencia estructural contrastada pasa gate (archivo existente, hash real)."""
     repo_root = Path(__file__).resolve().parents[3]
     res = accept_evidence(str(repo_root / "audit" / "evidence" / "e2e_010.json"), "/bin/ls")
-    assert res["status"] in ("accepted", "rejected"), f"Gate debe responder: {res}"
+    assert res["status"] == "accepted", f"Gate debe aceptar evidencia válida con hash y esquema correctos: {res}"
+    assert res["errors"] == [], f"Gate no debe reportar errores con evidencia válida: {res}"
 
 def test_e2e_010_contrato_partal():
     """PROVEN: relación DATA no se eleva automáticamente; contrato mantiene PARTIAL."""

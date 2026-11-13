@@ -179,14 +179,26 @@ def replay_operacion(op_id: str) -> dict:
         params = json.loads(request_json_str) if request_json_str else {}
         # Intentar replay real (no modifica DB)
         if capability == "binary.inspect":
-            art_path = params.get("target", "").split("@")[0] if isinstance(params.get("target"), str) else None
-            # Resolver ruta relativa a repositorio
-            art = None
-            for base in ["amdgpu.ko", "tools/rxre/fixtures/bin/rxre_min.elf", "/bin/ls"]:
-                p = Path(base)
-                if p.exists():
-                    art = str(p.resolve())
-                    break
+            full_target = params.get("target", "")
+            art_path = full_target.split("@", 1)[0] if isinstance(full_target, str) and full_target else None
+            if not art_path:
+                return {"status": "no_target", "op_id": op_id, "error": "request_json.target missing or empty; refusing silent substitution"}
+            # Use the explicit target; never substitute another artifact silently.
+            p = Path(art_path)
+            if not p.is_absolute():
+                # Resolve against the repository root, then cwd as fallback - never 'first existing file'.
+                repo_root = Path(__file__).resolve().parents[3]
+                for candidate in (repo_root / p, Path.cwd() / p):
+                    if candidate.exists():
+                        art = str(candidate.resolve()); break
+                else:
+                    return {"status": "no_artefact", "op_id": op_id,
+                            "error": f"requested artifact {art_path!r} not present in repo or cwd; refuse silent substitution",
+                            "requested": art_path}
+            else:
+                if not p.exists():
+                    return {"status": "no_artefact", "op_id": op_id, "error": f"requested artifact {art_path!r} does not exist"}
+                art = str(p.resolve())
             result_replay = {"artefacto_reconstruido": art}
             if art:
                 try:
@@ -238,12 +250,14 @@ def evaluate_contract(result: dict, evidence_path: str = None) -> dict:
     results = result.get("results", []) if isinstance(result.get("results"), list) else []
     ev_path = Path(evidence_path) if evidence_path else None
     integrity = False
+    target_art_for_check = None
     if ev_path and ev_path.exists():
         try:
+            from rxre.core.evidence_integrity import validate_evidence_path
             meta = json.loads(ev_path.read_text())
-            art_path = meta.get("artefacto_path", meta.get("artefacto", ""))
-            art = Path(art_path) if art_path else None
-            integrity = art.exists() if art else False
+            target_art_for_check = meta.get("artefacto_path", meta.get("artefacto", ""))
+            v = validate_evidence_path(str(ev_path), target_art_for_check or None)
+            integrity = v["ok"]
         except Exception:
             integrity = False
     if status == "invalid_input" or precheck is False:

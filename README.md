@@ -40,15 +40,17 @@ case file — Spanish).
 sh evidence/r3/verify.sh
 ```
 
-One command; it checks the sealed manifest SHA-256s (32 artifacts),
-rebuilds the reconstruction, re-runs the differential comparison on **both
-generations of `filenvercmp` (34,145 × 2)** and on **all `wc` corpora**
-(LC_ALL=C and es_AR.utf8; bytes/chars/-L/flags), then runs the engine's
-Python test suites. Expected tail: `total=34145 mismatches=0` twice, eleven
-`total=… mismatches=0` lines for `wc`, `12 passed`, then `VERIFY: all steps passed`.
-
-Note: the `rxre-cleanroom` package exists so anyone can check on their own
-machine without this repo's structure: https://github.com/LexLuthorPrimero/rxre-cleanroom — release v1.2.0 ([release](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.2.0)) (MIT).
+One command; it checks the **SHA-256 of 42 sealed artifacts** against their
+manifest, verifies the identity of the native reference binaries
+(fail-closed), rebuilds the reconstruction, and re-runs the differential
+comparison on **both generations of `filenvercmp` (34,145 × 2)** plus
+the **challenge corpus (3,100 + 141)**, the **locale-invariance test**,
+the **i18n black-box**, and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
+bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
+tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
+`total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
+twelve `total=… mismatches=0` lines for `wc`, `20 passed`, then
+`VERIFY: all steps passed`.
 
 ## Repository layout
 
