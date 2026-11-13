@@ -77,8 +77,11 @@ black-box `es_AR.utf8` i18n seal (200 names, `ls -Av` vs reconstruction) lives i
 `evidence/r3/filenvercmp_i18n_20261126/` — still not broad generalization. If your adversary
 generator beats this corpus, file it in the sibling issue — that's a positive result.
 
-An optional `Dockerfile` exists for reviewers who want a pinned toolbox (gcc + python + pytest);
-it was authored WITHOUT a Docker daemon available (labelled as such) — use `verify.sh` directly if you can.
+An optional `Dockerfile` exists for reviewers who want a pinned toolbox (gcc + python + pytest).
+Built and run with **rootless podman 5.8.7** on this host: image boots `verify.sh`, and its suites
+pass (one host-artifact-bound test skips honestly because the sealed reference artifact lives on
+the author's private host; everything else passes). The image is pinned to `fedora:44` precisely
+because its `/usr/bin/ls` matches the sealed reference hash of this package.
 
 ## Documentation map
 
