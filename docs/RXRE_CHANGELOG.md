@@ -15,6 +15,10 @@
 
 ## 2026-11-13 (P0 on dirname)
 
+- **§1053 MENTE multi-round**: `mente_cycle` ahora integra iteraciones de discriminación, usado por `test_discovery_loopbench.py` — 3 rivales refutados, PREFIX sobrevive, NOT_DETERMINED. verify pin espera **77 passed, 2 skipped**. Terceros NOT_EXECUTED.
+
+
+
 - **§Etapa 6 Tests sobre binario real fijados**: `test_discovery_on_dirname.py`; `.rodata`-literal analysis (rizin izj); no false literal candidates dumped onto any classification PASS; `_no_profile_imported == True`; verify expects pins **78 passed, 2 skipped** distilled. Terceros NOT_EXECUTED.
 
 ## 2026-11-13 (P0 + bug crítico Fixes: discovery + reconstructor)

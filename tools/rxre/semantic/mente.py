@@ -95,7 +95,8 @@ def _fmt_input(x):
 
 def mente_cycle(hypotheses: List[RivalHypothesis], candidates: List[bytes],
                 target_binary: str, target_runner: Optional[Callable[[bytes], Any]] = None,
-                target_args: Optional[List[str]] = None) -> Dict[str, Any]:
+                target_args: Optional[List[str]] = None,
+                mind_budget: int = 0) -> Dict[str, Any]:
     """Ciclo completo: registro → selección → ejecución discriminante → actualización."""
     report = {
         "target_sha256": _hash(target_binary) if os.path.isfile(target_binary) else None,
@@ -106,66 +107,119 @@ def mente_cycle(hypotheses: List[RivalHypothesis], candidates: List[bytes],
         "refuted": [], "surviving": [],
         "epistemic_status": "NOT_DETERMINED",
     }
-    ranked = select_discriminating_inputs(hypotheses, candidates)
+    rivals = list(hypotheses)
+    survivors = list(hypotheses)
+    sequence = []
+
+    ranked = select_discriminating_inputs(survivors, candidates)
     if not ranked:
-        report["epistemic_status"] = "NOT_DETERMINED"
-        report["limitacion"] = "ninguna entrada candidata discrimina entre las hipótesis en este dominio"
-        for h in hypotheses:
-            report["surviving"].append(h.id)
+        report = {
+            "target_sha256": _hash(target_binary) if os.path.isfile(target_binary) else None,
+            "hypotheses": [h.id for h in rivals],
+            "discriminating_candidates": [],
+            "selected": {"input": None, "arguments": target_args or [],
+                         "disagreeing_pairs": None, "sequence": sequence},
+            "observation": None,
+            "rounds": 0,
+            "observations": [],
+            "refuted": [],
+            "surviving": [h.id for h in survivors],
+            "indeterminate": [],
+            "epistemic_status": "NOT_DETERMINED",
+            "limitacion": "ninguna entrada candidata discrimina entre las hipótesis en este dominio",
+            "honesty_note": "El superviviente no ha sido verificado por un tercero; solo no fue refutado por este experimento en este dominio.",
+        }
         return report
 
-    best = ranked[0]
-    x = best["input"]
-    if target_runner is not None:
-        obs_raw = target_runner(x)
-        obs_ok = True
-        obs = {"ok": True, "value": obs_raw}
-    else:
-        obs = run_target(target_binary, x, args=target_args)
-        obs_ok = obs["ok"]
-    prediction_map = {pid: pred for pid, pred in best["predictions"]}
-
-    observable = obs.get("value") if obs.get("value") is not None else obs.get("stdout") if obs.get("stdout") is not None else obs.get("returncode")
-
-    survivors = []
+    rounds_used = 0
+    used_inputs = set()
     refuted = []
     indeterminate = []
-    for h in hypotheses:
-        r = h.predicted_for(x)
-        failed = r.get("ok") is False
-        if failed:
-            indeterminate.append(h.id)
-            continue
-        hv = json.dumps(r["value"], sort_keys=True, default=str)
-        ov = None
-        if obs_ok:
-            try:
-                ov = json.dumps(observable, sort_keys=True, default=str)
-            except Exception:
-                ov = str(observable)
-        if obs_ok and hv == ov:
-            survivors.append(h.id)
-        elif obs_ok and hv != ov:
-            h.discriminating_failures.append({"input": _fmt_input(x),
-                                              "predicted": r["value"],
-                                              "observed": observable})
-            h.epistemic_status = "REFUTED"
-            refuted.append(h.id)
+    observations = []
+    last_obs = None
+    obs_ok_final = True
+
+    def _ripred(predictions_list, obs_ok):
+        preds = []
+        for pid, pred in predictions_list:
+            if pred is not None:
+                preds.append((pid, pred))
+            else:
+                preds.append((pid, None))
+        return preds
+
+    max_rounds = max(1, int(mind_budget or 0) + max(2, len(rivals)) * 4)
+    while True:
+        ranked = select_discriminating_inputs(survivors, candidates)
+        ranked = [r for r in ranked if _fmt_input(r["input"]) not in used_inputs]
+        if not ranked:
+            break
+        best = ranked[0]
+        x = best["input"]
+        used_inputs.add(_fmt_input(x))
+
+        if target_runner is not None:
+            obs_raw = target_runner(x)
+            obs_ok = True
+            obs = {"ok": True, "value": obs_raw}
         else:
-            indeterminate.append(h.id)
+            obs = run_target(target_binary, x, args=target_args)
+            obs_ok = obs["ok"]
+
+        observable = obs.get("value") if obs.get("value") is not None else obs.get("stdout") if obs.get("stdout") is not None else obs.get("returncode")
+        observations.append({"input": _fmt_input(x), "value": observable})
+
+        new_survivors = []
+        for h in survivors:
+            r = h.predicted_for(x)
+            failed = r.get("ok") is False
+            if failed:
+                indeterminate.append(h.id)
+                continue
+            hv = json.dumps(r["value"], sort_keys=True, default=str)
+            ov = None
+            if obs_ok:
+                try:
+                    ov = json.dumps(observable, sort_keys=True, default=str)
+                except Exception:
+                    ov = str(observable)
+            if obs_ok and hv == ov:
+                new_survivors.append(h)
+            elif obs_ok and hv != ov:
+                h.discriminating_failures.append({"input": _fmt_input(x),
+                                                  "predicted": r["value"],
+                                                  "observed": observable})
+                h.epistemic_status = "REFUTED"
+                refuted.append(h.id)
+            else:
+                new_survivors.append(h)
+                indeterminate.append(h.id)
+        survivors = new_survivors
+        last_obs = obs
+        obs_ok_final = obs_ok
+        rounds_used += 1
+        if len(survivors) <= 1:
+            break
+        if rounds_used >= max_rounds:
+            break
 
     report.update({
-        "selected": {"input": _fmt_input(x),
+        "selected": {"input": _fmt_input(sorted(used_inputs, key=str)[0]) if used_inputs else None,
                      "arguments": target_args or [],
-                     "disagreeing_pairs": best["disagreeing_pairs"]},
-        "observation": obs,
+                     "disagreeing_pairs": None,
+                     "sequence": sequence},
+        "observation": last_obs,
+        "rounds": rounds_used,
+        "observations": observations,
         "refuted": refuted,
-        "surviving": survivors,
+        "surviving": [h.id for h in survivors],
         "indeterminate": indeterminate,
-        "epistemic_status": "UNKNOWN_WITHOUT_OBSERVED_EVIDENCE" if not obs_ok else (
+        "epistemic_status": "UNKNOWN_WITHOUT_OBSERVED_EVIDENCE" if not obs_ok_final else (
             "NOT_DETERMINED" if survivors else "REFUTED_ALL"),
         "honesty_note": "El superviviente no ha sido verificado por un tercero; solo no fue refutado por este experimento en este dominio.",
     })
-    if not obs_ok:
+    if not obs_ok_final:
         report["limitacion"] = "target no ejecutable o obs fallida; no se afirma nada (fail-closed)"
+    if len(survivors) == 1:
+        report["limitacion"] = "único superviviente confirma consistencia en las observaciones, no equivalencia global"
     return report
