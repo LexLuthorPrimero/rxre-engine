@@ -1,5 +1,9 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-13 (fold multi-width)
+
+- **§1047 R3 — fold multi-width**: milestone `fold` ampliado de un único width a seis regeneraciones selladas/gated (-w 4 × seeds 13/14 + -w 1/2/3/8), 0 divergencias; verify.sh cubre las seis; manifiesto extendido y regenerado (SEAL.txt actualizado). Update-16 en EXPEDIENTE_R3.md. Terceros NOT_EXECUTED.
+
 ## 2026-11-13 (fold milestone)
 
 - **§1046 R3 — tercer objetivo sellado (fold)**: property reconstruction de `/usr/bin/fold -w 4` (cell width, tab stop 8) sellada con 2 generaciones de corpus (2.554 casos c/u; total=2554 ×2, 0 divergencias) y verify.sh con nueva etapa 11/13 (identidad fail-closed de /usr/bin/fold, sha256 95030461…). Manifiesto sellado ahora vincula 47 artefactos. Update-15 en EXPEDIENTE_R3.md. Verificación de terceros: NOT_EXECUTED.
