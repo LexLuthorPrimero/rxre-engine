@@ -57,6 +57,13 @@ are `test_replay_mision` cases whose precondition is the author's private operat
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
 
+## For independent reviewers
+
+[`reviewer-kit/`](reviewer-kit/) contains the step-by-step verification guide,
+the counterexample report template, and the scope/limits of this package. If you
+reproduce or refute the sealed chain, file it as an issue with your environment
+and exact commit.
+
 ## Repository layout
 
 ```
