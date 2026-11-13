@@ -8,7 +8,7 @@ No modifica contratos protegidos. No crea rutas paralelas de ejecución.
 """
 from __future__ import annotations
 
-import hashlib, json, os, sys, time
+import hashlib, json, os, re, subprocess, sys, time
 from typing import Any, Dict, List, Optional
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -117,7 +117,6 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
                     funcs = funcs_res[k]
                     break
 
-    import subprocess, json as _json
     import re
 
     # Per-function CFG extraction using rizin 'agf json @ offset'
@@ -165,7 +164,7 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
             # Find first { 
             idx = stdout.find("{")
             if idx >= 0:
-                data = _json.loads(stdout[idx:])
+                data = json.loads(stdout[idx:])
                 nodes = data.get("nodes", [])
                 if nodes:
                     cfg_successful += 1
@@ -383,7 +382,7 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
             _i = _s.find("{")
             if _i < 0:
                 continue
-            _ops = _json.loads(_s[_i:]).get("ops", [])
+            _ops = json.loads(_s[_i:]).get("ops", [])
             _by_off = {int(o.get("offset", -1) or -1): o for o in _ops if isinstance(o, dict)}
             for _e in callgraph_edges:
                 if _e["source_function_offset"] != _soff or _e["resolution_status"] != "UNRESOLVED":
@@ -484,7 +483,7 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
             _i = _s.find("{")
             if _i < 0:
                 continue
-            _ops = _json.loads(_s[_i:]).get("ops", [])
+            _ops = json.loads(_s[_i:]).get("ops", [])
         except Exception:
             continue
         for _op in _ops:

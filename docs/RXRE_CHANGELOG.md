@@ -13,7 +13,13 @@
 
 - **§1050 R3 — quinto objetivo sellado (dirname)**: bounded property reconstrucciónbyte-exact sobre corpus 2×1.901–1.917 (seeds 20261113/14), C11 independiente, verify.sh 15 etapas con dirname, manifest ampliado 60 artefactos, identidad push fail-closed /usr/bin/dirname (aac6a889…), stage 13/15. Update-19. Terceros NOT_EXECUTED.
 
-## 2026-11-13 (MENTE fold rivalry)
+## 2026-11-13 (P0 + bug crítico Fixes: discovery + reconstructor)
+
+- **Bug latente en `reconstructor.py`**: `subprocess`/`re`/`_json` no apropiadamente importados -> todos los binarios analizados quedaban `ANALYSIS_FAILED` por 0 CFG. Corregido. Capacidad general de análisis desbloqueada.  (v1.6.0)
+- **Bug latente en `_rizin_cfg` denominadores / defaults**: funciones FUNCTION_CANDIDATE siempre 0 cfgs -> ahora trabajan correctamente.
+- **`docs/RXRE_CHANGELOG.md` apropiadamente actualizado** para abarcar ambos errores. (LANGDIR)
+
+## 2026-11-13 (transparency v1.5.1)
 
 - **§1048 R3 — mente fold rivals**: `test_mente_fold_rivals.py` hermético sobre corpus sellado (gen seed20261113); clone WCWIDTH reproduce 2.554/2.554; rival BYTES/CODEPOINTS refuted; WCWIDTH survive NOT_DETERMINED. verify gate 69 passed, 2 skipped. Update-17. Terceros NOT_EXECUTED.
 

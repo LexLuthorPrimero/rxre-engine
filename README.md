@@ -56,7 +56,7 @@ bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
 two `total=2554 mismatches=0` lines for **fold**,
-twelve `total=… mismatches=0` lines for `wc`, `72 passed, 2 skipped` (the 2 skips
+twelve `total=… mismatches=0` lines for `wc`, `74 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
@@ -112,7 +112,7 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
 - Sibling public package: `rxre-cleanroom` [v1.5.3](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.5.3) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.5.3 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.3) (`rxre-engine-1.5.3.zip`; current — **FIVE bounded targets sealed**: filenvercmp, wc, fold, tr, **and dirname**; verify gate `72 passed, 2 skipped`; 15 stages; 60-artefact manifest). Superseded snapshots kept byte-exact: [v1.5.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.1) (identical evidence, README pointer fix — see release notes), [v1.5.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.0) (FIVE targets + transparency), [v1.4.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.4.0) (FOUR targets), [v1.3.10](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.10), [v1.3.9](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.9), [v1.3.8](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.8).
+- Own auditable snapshot: [v1.6.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.6.0) (`rxre-engine-1.6.0.zip`; current — **FIVE bounded targets sealed**: filenvercmp, wc, fold, tr, **and dirname**; verify gate `74 passed, 2 skipped`; 15 stages; 60-artefact manifest). Superseded snapshots kept byte-exact: [v1.5.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.3) (transparency/content fix), [v1.5.1](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.1), [v1.5.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.0) (FIVE targets + transparency), [v1.4.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.4.0) (FOUR targets), [v1.3.10](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.10), [v1.3.9](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.9), [v1.3.8](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.8).
 
 ## License & authorship
 
