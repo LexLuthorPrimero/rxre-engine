@@ -1,0 +1,61 @@
+# findings tables for knowledge graph (RXRE-1640)
+c.execute("""
+    CREATE TABLE IF NOT EXISTS findings (
+        finding_id   TEXT PRIMARY KEY,
+        op_id        TEXT REFERENCES operations(op_id),
+        claim        TEXT NOT NULL,   -- texto de la afirmación
+        epistemic    TEXT,            -- PROVEN, PARTIAL, NOT_DETERMINED, PROVEN_ABSENT, DEFERRED
+        evidence_ids TEXT,            -- JSON array de result_id que soportan este finding
+        provenance   TEXT,            -- JSON con producer, tool_version, params, timestamp
+        limitations  TEXT,            -- JSON array de limitaciones declaradas
+        created_at   TEXT DEFAULT (datetime('now'))
+    )
+""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS finding_relations (
+        relation_id  TEXT PRIMARY KEY,
+        source_id    TEXT REFERENCES findings(finding_id),
+        target_id    TEXT REFERENCES findings(finding_id),
+        relation     TEXT NOT NULL,   -- CORRIGE, IMPLEMENTA, GENERALIZA, CONTINUA, COMPLETA, RETRACTA, MEDIDO_EN_MI_ASIC_POR
+        evidence     TEXT,            -- JSON con la evidencia y método que sostiene la relación
+        confidence   TEXT,            -- FUERTE, DEBIL, INFERIDA
+        created_at   TEXT DEFAULT (datetime('now'))
+    )
+""")
+# Mission tables for persistent mission state (RXRE-AUTONOMY-001)
+c.execute("""
+    CREATE TABLE IF NOT EXISTS missions (
+        mission_id   TEXT PRIMARY KEY,
+        title        TEXT NOT NULL,
+        description  TEXT,
+        status       TEXT DEFAULT 'PENDING',  -- PENDING, IN_PROGRESS, BLOCKED, COMPLETED
+        created_at   TEXT DEFAULT (datetime('now')),
+        updated_at   TEXT DEFAULT (datetime('now')),
+        completed_at TEXT
+    )
+""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS mission_criteria (
+        criterion_id TEXT PRIMARY KEY,
+        mission_id   TEXT REFERENCES missions(mission_id),
+        description  TEXT NOT NULL,
+        epistemic    TEXT DEFAULT 'NOT_DETERMINED',  -- PROVEN, PARTIAL, NOT_DETERMINED, PROVEN_ABSENT, DEFERRED
+        evidence_ids TEXT,            -- JSON array de finding_ids que sustentan este criterio
+        required     INTEGER DEFAULT 1,  -- 0=optional, 1=required
+        created_at   TEXT DEFAULT (datetime('now'))
+    )
+""")
+c.execute("""
+    CREATE TABLE IF NOT EXISTS mission_tasks (
+        task_id      TEXT PRIMARY KEY,
+        mission_id   TEXT REFERENCES missions(mission_id),
+        title        TEXT NOT NULL,
+        description  TEXT,
+        status       TEXT DEFAULT 'PENDING',  -- PENDING, IN_PROGRESS, COMPLETED, FAILED, BLOCKED
+        priority     INTEGER DEFAULT 0,
+        dependencies TEXT,            -- JSON array de task_ids que deben completarse primero
+        created_at   TEXT DEFAULT (datetime('now')),
+        completed_at TEXT
+    )
+""")
+c.commit()

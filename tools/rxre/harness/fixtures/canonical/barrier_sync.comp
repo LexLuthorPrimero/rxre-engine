@@ -1,0 +1,20 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 0) buffer Input { uint indata[]; };
+layout(set = 0, binding = 1) buffer Output { uint outdata[]; };
+
+shared uint shared_buf[64];
+
+void main() {
+    uint idx = gl_LocalInvocationID.x;
+    shared_buf[idx] = indata[gl_GlobalInvocationID.x];
+    barrier();
+    // Reverse reduction
+    if (idx < 32u) {
+        shared_buf[idx] += shared_buf[idx + 32u];
+    }
+    barrier();
+    if (idx == 0u) {
+        outdata[gl_WorkGroupID.x] = shared_buf[0];
+    }
+}

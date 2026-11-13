@@ -1,0 +1,30 @@
+Compute Shader
+disasm:
+BB0:
+	s_lshl_b32 s3, s3, 6                                        ; 8e038603
+	s_mov_b64 s[0:1], 0                                         ; be800180
+	s_mov_b64 s[4:5], exec                                      ; be84017e
+	v_add_u32_e32 v0, vcc, s3, v0                               ; 32000003
+	v_min_u32_e32 v1, 64, v0                                    ; 1c0200c0
+	s_branch BB1                                                ; bf820003
+BB6:
+	s_mov_b64 exec, s[4:5]                                      ; befe0104
+	s_add_u32 s0, s0, s1                                        ; 80000100
+	s_add_u32 s1, s1, 1                                         ; 80018101
+BB1:
+	v_cmpx_ge_u32_e32 vcc, s1, v1                               ; 7dbc0201
+BB2:
+	v_mov_b32_e32 v1, s0                                        ; 7e020200
+	s_andn2_b64 s[4:5], s[4:5], exec                            ; 89847e04
+	s_cbranch_scc1 BB6                                          ; bf85fff9
+BB7:
+	s_mov_b32 s3, 0                                             ; be830080
+	s_load_dwordx4 s[0:3], s[2:3], 0x0                          ; c00a0001 00000000
+	s_mov_b64 exec, -1                                          ; befe01c1
+	v_lshlrev_b32_e32 v0, 2, v0                                 ; 24000082
+	s_waitcnt lgkmcnt(0)                                        ; bf8cc07f
+	buffer_store_dword v1, v0, s[0:3], 0 offen                  ; e0701000 80000100
+	s_endpgm                                                    ; bf810000
+
+DEVICE: AMD Radeon RX 550 / 550 Series (RADV POLARIS12)
+RESULTS:

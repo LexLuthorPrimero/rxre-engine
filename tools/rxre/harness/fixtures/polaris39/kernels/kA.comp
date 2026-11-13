@@ -1,0 +1,14 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 1) buffer Output { uint data[]; };
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint v = idx * 2654435761u;
+    if (v < 100000000u) {
+        if ((idx & 1u) == 0u) { data[idx] = v + 1u; }
+        else { data[idx] = v * 2u; }
+    } else {
+        if ((idx & 2u) == 0u) { data[idx] = v ^ 0xFF00FFFFu; }
+        else { data[idx] = v; }
+    }
+}

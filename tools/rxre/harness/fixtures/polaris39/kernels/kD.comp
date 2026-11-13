@@ -1,0 +1,15 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 0) buffer In { uint indata[]; };
+layout(set = 0, binding = 1) buffer Output { uint outdata[]; };
+shared uint scratch[64];
+void main() {
+    uint idx = gl_LocalInvocationID.x;
+    uint gid = gl_GlobalInvocationID.x;
+    scratch[idx] = indata[gid] + 1u;
+    barrier();
+    uint neighbor = scratch[(idx + 1u) % 64u];
+    scratch[idx] = neighbor ^ indata[gid];
+    barrier();
+    outdata[gid] = scratch[(idx + 32u) % 64u];
+}

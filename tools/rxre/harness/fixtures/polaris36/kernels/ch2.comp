@@ -1,0 +1,9 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 1) buffer Output { uint data[]; };
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    // Boundary guard: alternate branch unreachable in this 64-lane dispatch;
+    // ISA exposes the branch, which remains UNVALIDATED by construction.
+    if (i >= 64u) { data[i] = 0u; } else { data[i] = i * 13u + 5u; }
+}

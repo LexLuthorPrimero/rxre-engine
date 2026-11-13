@@ -1,0 +1,9 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 0) buffer In { uint indata[]; };
+layout(set = 0, binding = 1) buffer Output { uint outdata[]; };
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint j = indata[idx] & 63u;
+    outdata[idx] = indata[(j + 7u) & 63u] * 2u;
+}

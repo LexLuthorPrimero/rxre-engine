@@ -1,0 +1,10 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 1) buffer Output { uint data[]; };
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    uint h = i;
+    h = h * 1664525u + 1013904223u;
+    h ^= h >> 16;
+    data[i] = (h ^ (h >> 13)) * 2246822519u;
+}

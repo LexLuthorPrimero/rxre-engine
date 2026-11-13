@@ -1,0 +1,19 @@
+#version 450
+layout(local_size_x = 64) in;
+layout(set = 0, binding = 1) buffer Output { uint data[]; };
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint result = 0u;
+    switch (idx % 4u) {
+        case 0u: result = idx + 1u; break;
+        case 1u: result = idx * 2u; break;
+        case 2u: result = idx - 1u; break;
+        default: result = 0u; break;
+    }
+    // Additional conditional
+    if (result > 50u) {
+        result = result / 2u;
+    }
+    data[idx] = result;
+}
