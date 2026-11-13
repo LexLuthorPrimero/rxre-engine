@@ -1,7 +1,7 @@
 # Checklist — primer auditor externo (≤15 min)
 
 Guía operativa para quien responda la convocatoria ciega (issue #1, rxre-cleanroom).
-Ty emplearla una vez por ejecución; adjuntalo con tu dictamen si la usas.
+Empléala como guion de una única ejecución; adjúntala a tu dictamen si la usas.
 
 ## A. Antes de ejecutar (preflight — anotar todo esto)
 
