@@ -1,0 +1,17 @@
+# R3 — fold (GNU coreutils 9.10 /usr/bin/fold, Fedora 44 fc44) — milestone etapa 3
+# Sello: corpus ANTES de dotar a la reconstrucción de nada (gen_fold_cases.py lo único hecho por el autor).
+# Identidad nativa (fail-closed; value of verification = the host's value):
+#   /usr/bin/fold = sha256:9503046131ed5070acca13388497241d213cb8d7f9d096fd1dcecacd0bc325d7  (coreutils-9.10-5.fc44.x86_64)
+#   size = 36.632 bytes
+# Objetivo de la etapa: reconstruir UNA propiedad (ancho de línea en celdas con tab stop 8), no el binario completo.
+# Modelo independiente escrito a mano: EAW W/F=2, Cc/Cn/Cs/Co/Mn→0, jamo conjoining U+1160-11FF→0,
+# soft-hyphen 0xAD→1 (quirk observado), tab→next multiple of 8, salto "antes" del codepoint que
+# exceda w con contenido previo no vacío; línea "vacía" puede desbordarse (regla empírica con evidencia sellada abajo).
+sha256:41a2d590b6af31f3d8f1d8467ba35ddb59ebd92aa5f44c72d663b71859946a7d  cases_fold_seed20261113.txt  (2.554 casos; seed 20261113)
+sha256:0e022b21e13be74f450fab9a098d33ca64c6f5f6eb177f973c21170ea0713f52  cases_fold_seed20261114.txt  (2.554 casos; seed 20261114)
+sha256:a4f277ca43065400923ec86f6113e49744ec01949ae9b174f832c51574520a87  foldwrap.c  (reconstrucción 142 líneas, C11)
+sha256:29c34788895038e6c247113f8062acee730d561a1b34c82a69e037207b8f07d6  gen_fold_cases.py  (generador sellado)
+Oráculo: /usr/bin/fold -w 4 invocado sobre cada caso; salida por caso en el propio corpus (campo B tras TAB).
+Verificación: 2 generaciones selladas × 2.554 casos, 0 divergencias (total=2554 mismatches=0 en ambas).
+Alcance honesto: sólo -w 4; sólo UTF-8 válido; sólo stdin→stdout sin flags; sin -s/-b/-g/s; sin dicción sobre glibc wcwidth.
+No se promociona etiqueta alguna por fuera del dominio; verificación de terceros: NOT_EXECUTED.

@@ -35,7 +35,7 @@ sha256sum -c evidence/r3/SHA256SUMS   # si existe en esta versión; si no, verif
 sh evidence/r3/verify.sh
 ```
 
-`verify.sh` ejecuta, en orden fail-closed: (1) manifiesto sellado (42 artefactos),
+`verify.sh` ejecuta, en orden fail-closed: (1) manifiesto sellado (47 artefactos),
 (2) identidad nativa de `ls`/`wc`, (3–4) build + diferencial de las dos
 generaciones (34.145×2), (5) challenge corpus (3.100 + 3.241), (6) invariancia
 de locale, (7) i18n black-box, (8–10) wc en `LC_ALL=C` y `es_AR.utf8` (11 corpora),

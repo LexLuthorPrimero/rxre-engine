@@ -30,6 +30,7 @@ Only two targets exist, with sealed evidence inside `evidence/r3/`:
 |---|---|---|---|
 | filenvercmp (sort = version) in /usr/bin/ls — sha256 54e936d3... | semantic C reconstruction | 34,145 x 2 sealed pairs (seeds 20261112/13, 0 divergences); adversarial challenge 3,100+141 / 0 divergences; locale-invariance byte-equal C ≡ es_AR.utf8; i18n black-box 200 names identity vs native ls -v | ok byte-exact vs native |
 | wc in /usr/bin/wc — sha256 81d61459... | semantic C reconstruction | C locale + es_AR.utf8; default / flags / -m multibyte / -L width / --files0-from / flags x multibyte / files0-from adversarial | ok 0 divergences vs native GNU |
+| fold in /usr/bin/fold — sha256 95030461... | property reconstruction (line-wrap width, -w 4) | 2 sealed generations (2.554 each, seeds 20261113/14); valid UTF-8 inputs only; byte-exact vs native `/usr/bin/fold -w 4` | ok 0 divergences vs native GNU |
 
 Details, logs and matrices live in `evidence/r3/` (`EXPEDIENTE_R3.md` is the full
 case file — Spanish).
@@ -42,16 +43,17 @@ case file — Spanish).
 sh evidence/r3/verify.sh
 ```
 
-One command; it checks the **SHA-256 of 42 sealed artifacts** against their
+One command; it checks the **SHA-256 of 47 sealed artifacts** against their
 manifest, verifies the identity of the native reference binaries
-(fail-closed), rebuilds the reconstruction, and re-runs the differential
+(`/usr/bin/ls`, `/usr/bin/wc`, `/usr/bin/fold`; fail-closed), rebuilds the reconstruction, and re-runs the differential
 comparison on **both generations of `filenvercmp` (34,145 × 2)** plus
 the **challenge corpus (3,100 + 141 deliberately identical a==b = 3,241 cases)**,
 the **locale-invariance test**,
-the **i18n black-box**, and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
+the **i18n black-box**, the **fold property reconstruction** (2 sealed generations, byte-exact), and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
 bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
+two `total=2554 mismatches=0` lines for **fold**,
 twelve `total=… mismatches=0` lines for `wc`, `66 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
