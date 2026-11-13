@@ -1,7 +1,9 @@
 # EXPEDIENTE R3 — Cadena E2E de reconstrucción semántica de filenvercmp/filevercmp sobre /usr/bin/ls (2026-11-12)
 
 **Estado: OPEN — cero divergencias en ambas generaciones selladas (update-5, 2026-11-12); sin dictamen PASS de tercera parte.**
-**Update-7 (2026-11-13):** verificación extendida — añade comprobación de identidad SHA-256 de los binarios nativos (fail-closed) antes de cualquier salto, incorpora el challenge corpus (3.100+141 casos, todos `mismatches=0`), el test de invariancia de locale (C ≡ es_AR.utf8, 2×34.145 byte-identical), el i18n black-box (200 nombres UTF-8 vs `ls -v` nativo; sort_names compiled from the reconstruction,byte-comparadas al snapshot del oráculo), y el número real de tests pytest (20) y no uno inscrito a mano. El manifiesto sellado ahora vincula 42 artefactos.
+**Update-7 (2026-11-13):** verificación extendida — añade comprobación de identidad SHA-256 de los binarios nativos (fail-closed) antes de cualquier salto, incorpora el challenge corpus (3.100 + 141 = 3.241 casos, todos `mismatches=0`), el test de invariancia de locale (C ≡ es_AR.utf8, 2×34.145 byte-identical), el i18n black-box (200 nombres UTF-8 vs `ls -v` nativo; sort_names compiled from the reconstruction,byte-comparadas al snapshot del oráculo), y el número real de tests pytest (20) y no uno inscrito a mano. El manifiesto sellado ahora vincula 42 artefactos.
+
+**Update-8 (2026-11-13):** reparación de mecanismos de admisión y replay (revisión estática externa, HEAD 5cd7b47): (i) `evaluate_contract()` ya no puede producir COMPLETE/VALID sin que la puerta de integridad (validate_evidence_path: hash+tamaño+esquema) devuelva ok; (ii) `analyze_dependencies()` y `replay_operacion()` usan `request_json.target`, nunca sustituyen por otro artefacto, y sólo validan evidencia vinculada al artefacto solicitado; (iii) `replay_operacion()` calcula el SHA-256 del solicitado ANTES de ejecutar el backend y aborta fail-closed en discrepancia; (iv) capability distinta de binary.inspect devuelve UNSUPPORTED explícito; (v) verify.sh incorpora test_replay_mision.py (23 passed, 2 skipped honestos sin la DB privada del autor); (vi) cobertura UTF-8 3.89% acotada al corpus original 20261112/13 — el challenge corpus es deliberadamente lo contrario; (vii) conteo challenge unificado: 3.100 + 141 = 3.241 (hito 13/13b). Secciones históricas superadas marcadas explícitamente más abajo. La independencia de terceros sigue NOT_EXECUTED.
 
 **Update-6 (2026-11-13):** verificación unificada en un único comando: `sh evidence/r3/verify.sh` — 32 artefactos sellados vs `manifest.txt`, filenvercmp (2×34.145) + wc (11 corpora) + 12/12 suites Python. Las 791 divergencias originales fueron resueltas (reconstrucción por transcripción literal del desensamblado) y verificadas en dos generaciones selladas (34.145 + 34.145 casos), 3 toolchains y sandbox bwrap. No se habilita producción ni generalización; la verificación autónoma de terceros (fuera de este host/autor) permanece NOT_EXECUTED.
 
@@ -28,12 +30,16 @@ EVIDENCE → SEMANTICS → SCHEMA → DISCRIMINATING TEST → IMPLEMENTATION →
 | `w_end_probe` (sintaxis de fin de lado) | 255 bytes | **255 / 255** match con tabla `w_of` (letras `c+1`; dígitos `{0}→0,{1..9}→1`; demás `c+257`; `~ → −1`) |
 | Punto vs grupo de dígitos fuera de cadena | `pair_matrix.csv` (8.001 pares en bytes 1..127) | Tabla completa transitiva y antisimétrica, 0 violaciones; comportamiento de `.` y `~` en posición 0 capturado |
 
+> **[SUPERSEDED 2026-11-12, update-5 — ver §11: las 791 divergencias fueron resueltas; esta sección preserva el estado histórico.]**
+
 ## 4. División en objetivos secundarios abiertos (791 discrepancias)
 Ranuras divergentes principales:
 - **777** casos con al menos un `.` en el interior (clase `dot-mid`): incluye `'a!b' vs 'a.'`, `'R96]'9B' vs 'R.'`, `'a.1.10' vs 'a.1.010'`.
 - **14** casos con dot-leading múltiple (##`both-dot`): `'...' vs '.a'`, `'.a~' vs '...'`.
 
 Las tres piezas verificadas no son suficientes para cerrar la cadena: **el anidamiento la ↔ prefix en puntos iniciales/medios no reproduce el comportamiento nativo completo** (la rama de extensión de `.` en `verrevcmp` y el encadenamiento `->file_prefixlen->verrevcmp` necesita más evidencia).
+
+> **[SUPERSEDED 2026-11-12, update-5 — §11 demuestra cero divergencias en ambas generaciones; la tabla de abajo describe el estado al cierre de la fase de objetivos secundarios.]**
 
 ## 5. Resultados
 | Eje | Veredicto |
@@ -67,7 +73,7 @@ Ningún elemento de esta sección autoriza integrar, promover o declarar complet
 - Ninguna otra pieza fue modificada: `AGENTS.md`, `rxre.sqlite3`, `core/store.py`, contratos, README, fixtures y el resto del histórico (§1036–§1044) permanecen intactos. Tercera copia física del Plan Maestro: no localizada; discrepancia explícita preservada en §1044.7/§1045.4.
 - Veredicto de §1045: G1045 = PUBLISHED. No se abren misiones automáticamente; pasos siguientes pendientes de autorización explícita en orden de dependencia (aceptar aceptación → ESENCIA → MVP `reconstruct` → métrica externa con autonomía del tercero).
 ## 10. Resultado
-Identidad oficial registrada respetuosamente como addendum; R3 permanece OPEN con su conteo original (791 divergencias); ninguna etiqueta promovida; el monumento histórico del Plan Maestro intacto.
+Identidad oficial registrada respetuosamente como addendum; R3 permanece OPEN con su conteo original (791 divergencias, estado histórico al 2026-11-12); ninguna etiqueta promovida; el monumento histórico del Plan Maestro intacto. **NOTA update-5+: §11 resolvió las 791 divergencias; ver §12 y los updates 6–8 en cabecera para el estado vigente.**
 
 ## 11. Resolución de las 791 divergencias (2026-11-12, update-5) — cero divergencias en ambas generaciones
 Autorización: propietario ("el mas completo"); alcance: cierre de divergencias, segunda generación sellada, verificación acotada. Restricciones preservadas: sin GPU, sin `sudo`, sin `--auto`, sin `op:claim`, sin bucles autónomos; repo, `AGENTS.md`, `rxre.sqlite3`, corpus y oráculos 20261112 **intactos**.

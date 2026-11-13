@@ -24,7 +24,7 @@ Binario objetivo: sha256 `81d614595c717be908fce809713702efd35ce5a56f5ab7cbc497d1
 | **`--files0-from` adversarial fuzz** (CRLF, NUL-embebido, isolates U+2066/2069, FULLWIDTH, empty, NFD) | seed 20261128 (2.200 archivos) | 0 | 0 |
 | **filenvercmp `ls -v` locale-invariance** | 2×34.145 casos | byte-equal | byte-equal |
 | **filenvercmp 200-nombres i18n** | reconstrucción vs `ls -v` nativo | **idéntico** | **idéntico** |
-| **filenvercmp challenge corpus externo** | 3.100 + 141 identical | 0 | 0 (UTF-8) |
+| **filenvercmp challenge corpus externo** | 3.100 (hito 13) + 141 id. a==b añadidas (hito 13b) = **3.241** | 0 (h13b) / 0 (h13) | 95.1% UTF-8 |
 
 **Bug corregido en este release (caracteres por codepoint inválido)**
 `utf8_decode` antes contaba 1 char incluso en secuencias inválidas; GNU las ignora
