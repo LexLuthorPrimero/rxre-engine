@@ -108,7 +108,7 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
 - Sibling public package: `rxre-cleanroom` [v1.1.0](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.1.0) — same brother-in-arms; its commit hashes are part of the public seals in this tree.
-- Own auditable snapshot: [v1.0.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.0.0) with `rxre-engine-1.0.0.zip` (full tree at commit `356cfb0`, SHA-256 `44741e96…`, verify with `sh evidence/r3/verify.sh`).
+- Own auditable snapshot: [v1.3.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.0) (`rxre-engine-1.3.0.zip`, SHA-256 `8c67df83…`; full tree at tag `v1.3.0`, verify with `sh evidence/r3/verify.sh`). Previous snapshot: [v1.0.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.0.0) (`356cfb0`).
 
 ## License & authorship
 
