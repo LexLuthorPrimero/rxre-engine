@@ -25,7 +25,7 @@ Ver `RXRE_IDENTIDAD.md` para la declaración íntegra y firmada (sha256 `cce2288
 - Verificar independencia física: hoy solo un host (`kalm`); E2E-039 — independencia de segundo host **BLOCKED**.
 - `/tmp` es efímero; los sellos y artefactos críticos deben promoverse a `store/` (pendiente).
 - `op:claim`, `--auto`, `sudo`: **no usados**. `autonomous_loop=False`; `max_iter` acotado.
-- Evidencia subyacente de `filevercmp` (R3): **OPEN — NOT_PASS** (791 / 34.145 divergencias).
+- Evidencia subyacente de `filenvercmp` (R3): **dos generaciones verificadas con 0 divergencias** (ambas 34.145 casos) en `rxre-cleanroom v1.2.0` y `rxre-engine/evidence/r3/`. Verificación de terceros: **NOT_EXECUTED**.
 
 ## Terminología mínima
 

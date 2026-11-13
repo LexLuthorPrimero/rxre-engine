@@ -21,7 +21,7 @@ RXRE no oculta limitaciones. Estas son las que afectan cualquier lectura del pro
 
 ## 4) Producto e integración
 - **Sin integración en producción**. Sin puerta de aceptación completa.
-- **§1044 R3 OPEN**: `filevercmp` sobre `/usr/bin/ls` — 791/34.145 divergencias; ninguna integración autorizada.
+- **R3 today**: `filenvercmp` sobre `/usr/bin/ls` y `wc` sobre `/usr/bin/wc` — 0 divergencias en ambas generaciones selladas; verificación independiente de terceros NOT_EXECUTED. (ver rxre-cleanroom v1.2.0 + rxre-engine README/attack; este documento conservará el estado histórico cuando corresponda)
 - `wc` y `ls` completos rechazados por `fidelity_domain_v2` (no construida para cubrirlos).
 - No hay comando `rxre reconstruct` públicamente estable.
 
@@ -36,7 +36,7 @@ RXRE no oculta limitaciones. Estas son las que afectan cualquier lectura del pro
 - Anexo del Plan Maestro crece más rápido que las capacidades; indexar (hecho: `RXRE_INDICE.md`) ayuda, no resuelve.
 
 ## 7) Legales y alcance
-- Licencia `GPL v2` (README). Documentos de informe tienen aviso de autoría.
+- Licencia `MIT` (ver LICENSE); sin GPL v2. Documentos de informe tienen aviso de autoría.
 - Fixtures `rxre.min.elf`, `amdgpu.ko`, etc. pueden no distribuirse.
 - Ningún binario de terceros se redistribuye.
 
