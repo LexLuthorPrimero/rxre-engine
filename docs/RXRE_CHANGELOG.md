@@ -1,8 +1,8 @@
 # RXRE — CHANGELOG documental
 
-## 2026-11-13 (basename milestone — candidato v1.9.0, sin publicar)
+## 2026-11-13 (basename milestone v1.9.0)
 
-- **§1055 R3 — sexto objetivo sellado (basename)**: propiedad acotada “último componente”; corpus 2×1.987/2.013 (seeds 20261114/15), UTF-8 wide chars + boundary buckets; reconstrucción C11 independiente (`basewrap.c`); verify.sh **16 etapas** (basename 14/16), manifiesto ampliado a **65 artefactos**; identidad fail-closed de `/usr/bin/basename` (sha256 `1ef99139…`, coreutils-9.10-5.fc44); `test_discovery_on_basename.py` (2 herméticos; gate **80 passed, 2 skipped**). Alcance honesto: único operando path, sin flags/sufijo; 0 divergencias contra oráculo nativo en hosts del autor. Verificación de terceros: **NOT_EXECUTED**. **v1.9.0 NO se etiqueta/publica sin autorización explícita del propietario.** Update-25.
+- **§1055 R3 — sexto objetivo sellado (basename)**: propiedad acotada “último componente”; corpus 2×1.987/2.013 (seeds 20261114/15), UTF-8 wide chars + boundary buckets; reconstrucción C11 independiente (`basewrap.c`); verify.sh **16 etapas** (basename 14/16), manifiesto ampliado a **65 artefactos**; identidad fail-closed de `/usr/bin/basename` (sha256 `1ef99139…`, coreutils-9.10-5.fc44); `test_discovery_on_basename.py` (2 herméticos; gate **80 passed, 2 skipped**). Alcance honesto: único operando path, sin flags/sufijo; 0 divergencias contra oráculo nativo en hosts del autor. Verificación de terceros: **NOT_EXECUTED**. v1.9.0 etiqueta y publica con autorización explícita del propietario (2026-11-13). Update-25.
 
 ## 2026-11-13 (transparency v1.5.1)
 
