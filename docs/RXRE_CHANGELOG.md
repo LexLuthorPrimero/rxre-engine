@@ -4,6 +4,10 @@
 
 - **§1049 R3 — cuarto objetivo sellado (tr, `-s x`)**: property reconstruction byte-exact sobre corpus 2×2.513 (seeds 20261113/14), identidad fail-closed `/usr/bin/tr` sha256 b1d1bfbe…, manifest ampliado 56 artefactos, verify.sh 14 etapas con tr. Update-18. Terceros NOT_EXECUTED.
 
+## 2026-11-13 (dirname milestone v1.5.0)
+
+- **§1050 R3 — quinto objetivo sellado (dirname)**: bounded property reconstrucciónbyte-exact sobre corpus 2×1.901–1.917 (seeds 20261113/14), C11 independiente, verify.sh 15 etapas con dirname, manifest ampliado 60 artefactos, identidad push fail-closed /usr/bin/dirname (aac6a889…), stage 13/15. Update-19. Terceros NOT_EXECUTED.
+
 ## 2026-11-13 (MENTE fold rivalry)
 
 - **§1048 R3 — mente fold rivals**: `test_mente_fold_rivals.py` hermético sobre corpus sellado (gen seed20261113); clone WCWIDTH reproduce 2.554/2.554; rival BYTES/CODEPOINTS refuted; WCWIDTH survive NOT_DETERMINED. verify gate 69 passed, 2 skipped. Update-17. Terceros NOT_EXECUTED.

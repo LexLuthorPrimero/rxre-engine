@@ -1,0 +1,13 @@
+# R3 — dirname (GNU coreutils 9.10 /usr/bin/dirname, Fedora 44 fc44) — milestone etapa 5-bis
+# Identidad nativa (fail-closed; valor de verificacion = valor del host):
+#   /usr/bin/dirname = sha256:aac6a889dcfe1bcaabdcfea17b89c643c29abee5efce3fafbbb0c34b70e864a7  (coreutils-9.10-5.fc44.x86_64)
+# Objetivo de la etapa: reconstruir UNA propiedad acotada — padre de directorio acotado.
+# Algoritmo VERIFICADO (sello): strip trailing slashes; if empty: "/" if leading slash else ".";
+# last slash: prefix stripped of trailing slashes; if empty: "/" if leading slash else "."; else prefix.
+# Corpus sellado ANTES de hipotesis: gen_dencases.py, seed 20261113/14; 1.917/1.901 casos, name diversity incl UTF-8 wide chars.
+# verify.sh stage 13/15. Verificacion in-example por subproceso /usr/bin/dirname.
+# Alcance honesto: solo ruta path (sin flags), sin diccion general de dirname; demo de reconstruccion por propiedad.
+sha256:807a2e2ca8ae59dc518dbca2b73a4c94d58801caf14c987d32dd5dc0ee6efd92  cases_dirname_seed20261113.txt
+sha256:2468158a34cc37587d903cc020be0d24b035c42ff0b9e540d6c1dc99b54fabfa  cases_dirname_seed20261114.txt
+sha256:dcd56ed0ad848dcfcea16efb13566b3e829b73080cce3fab4091ea61b18094e5  denwrap.c
+sha256:a4077b09429ad727160f768ae6a4838e613dbe4cb37d2517a5009a92ef7618ad  gen_dencases.py

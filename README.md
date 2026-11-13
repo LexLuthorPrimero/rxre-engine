@@ -32,6 +32,7 @@ Only two targets exist, with sealed evidence inside `evidence/r3/`:
 | wc in /usr/bin/wc — sha256 81d61459... | semantic C reconstruction | C locale + es_AR.utf8; default / flags / -m multibyte / -L width / --files0-from / flags x multibyte / files0-from adversarial | ok 0 divergences vs native GNU |
 | fold in /usr/bin/fold — sha256 95030461... | property reconstruction (line-wrap width) | 2 sealed generations (2.554 each, -w 4, seeds 20261113/14) + gated w=1/2/3/8 corpora (1.054 each; 6 gated regenerations); valid UTF-8 only; byte-exact vs native `/usr/bin/fold -w N` | ok 0 divergences vs native GNU |
 | tr in /usr/bin/tr — sha256 b1d1bfbe... | property reconstruction (squeeze of byte-x runs, `tr -s x`) | 2 sealed generations (2.513 each, seeds 20261113/14); byte-exact vs native `/usr/bin/tr -s x` with harness over stdin | ok 0 divergences vs native GNU |
+| dirname in /usr/bin/dirname — sha256 aac6a889... | property reconstruction (parent directory, bounded) | 2 sealed generations (1.917/1.901, seeds 20261113/14); byte-exact vs native `/usr/bin/dirname` with harness over stdin | ok 0 divergences vs native GNU |
 
 Details, logs and matrices live in `evidence/r3/` (`EXPEDIENTE_R3.md` is the full
 case file — Spanish).
@@ -111,7 +112,7 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
 - Sibling public package: `rxre-cleanroom` [v1.3.7](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.3.7) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.4.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.4.0) (`rxre-engine-1.4.0.zip`; current — **FOUR bounded targets sealed**: filenvercmp, wc, fold, and now `tr` `-s x`; verify gate `69 passed, 2 skipped`; 14 stages; 56-artefact manifest). Superseded snapshots kept byte-exact: [v1.3.10](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.10) (docs coherence), [v1.3.9](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.9) (MENTE etapa 4), [v1.3.8](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.8) (fold multi-width), [v1.3.7](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.7), [v1.3.6](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.6).
+- Own auditable snapshot: [v1.5.0 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.5.0) (`rxre-engine-1.5.0.zip`; current — **FIVE bounded targets sealed**: filenvercmp, wc, fold, tr, **and dirname**; verify gate `69 passed, 2 skipped`; 15 stages; 60-artefact manifest). Superseded snapshots kept byte-exact: [v1.4.0](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.4.0) (FOUR targets), [v1.3.10](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.10), [v1.3.9](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.9), [v1.3.8](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.8), [v1.3.7](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.7), [v1.3.6](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.6).
 
 ## License & authorship
 
