@@ -1,5 +1,9 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-13 (MENTE fold rivalry)
+
+- **§1048 R3 — mente fold rivals**: `test_mente_fold_rivals.py` hermético sobre corpus sellado (gen seed20261113); clone WCWIDTH reproduce 2.554/2.554; rival BYTES/CODEPOINTS refuted; WCWIDTH survive NOT_DETERMINED. verify gate 69 passed, 2 skipped. Update-17. Terceros NOT_EXECUTED.
+
 ## 2026-11-13 (fold multi-width)
 
 - **§1047 R3 — fold multi-width**: milestone `fold` ampliado de un único width a seis regeneraciones selladas/gated (-w 4 × seeds 13/14 + -w 1/2/3/8), 0 divergencias; verify.sh cubre las seis; manifiesto extendido y regenerado (SEAL.txt actualizado). Update-16 en EXPEDIENTE_R3.md. Terceros NOT_EXECUTED.

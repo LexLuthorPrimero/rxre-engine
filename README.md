@@ -54,7 +54,7 @@ bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
 two `total=2554 mismatches=0` lines for **fold**,
-twelve `total=… mismatches=0` lines for `wc`, `66 passed, 2 skipped` (the 2 skips
+twelve `total=… mismatches=0` lines for `wc`, `69 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
@@ -110,7 +110,7 @@ because its `/usr/bin/ls` matches the sealed reference hash of this package.
 - Spanish case files: `docs/RXRE_ESENCIA.md`, `docs/RXRE_LIMITACIONES.md`, `docs/RXRE_PROCEDENCIA.md`,
   `evidence/r3/EXPEDIENTE_R3.md`
 - Sibling public package: `rxre-cleanroom` [v1.3.7](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.3.7) — same brother-in-arms, aligned release; commended to the same blind-verification call.
-- Own auditable snapshot: [v1.3.7 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.7) (`rxre-engine-1.3.7.zip`; current — adds **etapa 3, tercer objetivo: `fold` property reconstruction** (2×2.554 casos, 0 divergencias; 13-stage verify.sh; 47-artefact manifest); verify gate `66 passed, 2 skipped`). Superseded snapshots kept byte-exact: [v1.3.6](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.6) (MENTE etapa 2 ×2), [v1.3.5](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.5), [v1.3.4](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.4), [v1.3.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.3).
+- Own auditable snapshot: [v1.3.7 release](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.7) (`rxre-engine-1.3.7.zip`; current — adds **etapa 3, tercer objetivo: `fold` property reconstruction** (2×2.554 casos, 0 divergencias; 13-stage verify.sh; 47-artefact manifest); verify gate `69 passed, 2 skipped`). Superseded snapshots kept byte-exact: [v1.3.6](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.6) (MENTE etapa 2 ×2), [v1.3.5](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.5), [v1.3.4](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.4), [v1.3.3](https://github.com/LexLuthorPrimero/rxre-engine/releases/tag/v1.3.3).
 
 ## License & authorship
 
