@@ -23,6 +23,8 @@
 
 **Update-17 (2026-11-13, MENTE etapa 4):** `test_mente_fold_rivals.py` hermético end-to-end sobre **fold sellado**: rival BYTES/CODEPOINTS refutados por el oráculo (el oráculo wrap-typed -w 4 en celdas Unicode); rival WCWIDTH survive NOT_DETERMINED; gemelo indistinguishable; cero PROVEN. Además, test de equivalencia verificadora: el clone NODEMENTE de la semántica WCWIDTH reproduce **byte-exacts los 2.554 casos sellados**. Gate verify.sh 13 etapas, pin **69 passed, 2 skipped**. Terceros NOT_EXECUTED.
 
+**Update-18 (2026-11-13, etapa 5 — tr, cuarto objetivo):** nuevo milestone `tr` PROPERTY reconstruction sellada con misma disciplina: verificación independiente en C11 (`trwrap.c`, greedy squeeze de runs consecutivos de byte `0x78` — sin -c/-d/-s-multi-arg/Unicode classes), corpus sintético seed 20261113/14 (2.513 casos c/u; sesgo fuerte a runs de x; 0 divergencias en ambas), identidad fail-closed pin de `/usr/bin/tr` (sha256 b1d1bfbe…), manifest ampliado a 56 artefactos, verify.sh en **14 etapas** (fold etapa 11, tr etapa 12, suites 13, cobertura 14). Alcance acotado: solo `tr -s x`, stdin→stdout; sin flags, sin clases; NO se afirma dicción general. Terceros NOT_EXECUTED.
+
 **Update-6 (2026-11-13):** verificación unificada en un único comando: `sh evidence/r3/verify.sh` — 32 artefactos sellados vs `manifest.txt`, filenvercmp (2×34.145) + wc (11 corpora) + 12/12 suites Python. Las 791 divergencias originales fueron resueltas (reconstrucción por transcripción literal del desensamblado) y verificadas en dos generaciones selladas (34.145 + 34.145 casos), 3 toolchains y sandbox bwrap. No se habilita producción ni generalización; la verificación autónoma de terceros (fuera de este host/autor) permanece NOT_EXECUTED.
 
 ## 1. Objetivo y alcance

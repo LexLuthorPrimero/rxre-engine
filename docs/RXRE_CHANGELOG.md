@@ -1,5 +1,9 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-13 (tr milestone v1.4.0)
+
+- **§1049 R3 — cuarto objetivo sellado (tr, `-s x`)**: property reconstruction byte-exact sobre corpus 2×2.513 (seeds 20261113/14), identidad fail-closed `/usr/bin/tr` sha256 b1d1bfbe…, manifest ampliado 56 artefactos, verify.sh 14 etapas con tr. Update-18. Terceros NOT_EXECUTED.
+
 ## 2026-11-13 (MENTE fold rivalry)
 
 - **§1048 R3 — mente fold rivals**: `test_mente_fold_rivals.py` hermético sobre corpus sellado (gen seed20261113); clone WCWIDTH reproduce 2.554/2.554; rival BYTES/CODEPOINTS refuted; WCWIDTH survive NOT_DETERMINED. verify gate 69 passed, 2 skipped. Update-17. Terceros NOT_EXECUTED.

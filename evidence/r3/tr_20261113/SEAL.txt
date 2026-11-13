@@ -1,0 +1,13 @@
+# R3 — ALTRU — tr (GNU coreutils 9.10 /usr/bin/tr, Fedora 44 fc44) — milestone etapa 5
+# Identidad nativa (fail-closed; valor de verificación = valor del host):
+#   /usr/bin/tr = sha256:b1d1bfbe1c28c8866c993b35745ada4bdd47fe53e4d5cf5d5450ca460b8cfce6  (coreutils-9.10-5.fc44.x86_64)
+# Objetivo de la etapa: reconstruir UNA propiedad acotada — `tr -s x` squeezing of runs of byte 0x78.
+# Modelo independiente escrito a mano: greedy squeeze de runs consecutivos de 'x' (byte 0x78) a un unico byte;
+# sin -d/ -c / -s multi-char; sin util unicode; sin volversobre bytes no-'x'.
+# Corpus sellado ANTES de cualquier hipótesis (gen_tr_cases.py, seed 20261113/14; 2.513 casos c/u; sesgo fuerte a runs de x).
+# verify.sh: etapa 12/14. Verificación en subproceso /usr/bin/tr -s x.
+# Alcance honesto: solo `-s x` (argumento 'x'); solo stdin→stdout; sin flags; sin dicción general de tr; terceros NOT_EXECUTED.
+sha256:aece429f06adab16097f027219fc5e3815d2478274da77cbebb4f6b9694b4e88  cases_tr_seed20261113.txt
+sha256:00d86b266459af06f942cc78c90ca353ce92aef9a7cfe699b0e964b9f9ad0c43  cases_tr_seed20261114.txt
+sha256:89fa9820576fc3de846ef57ac2588e4ccafd25b448c764f68e91e9bc83e30cf6  trwrap.c  (reconstrucción, C11)
+sha256:dc710b6cb08f23ce09e8ca6a657a0ccf4236ae0e67aff172f10131f2b391f826  gen_tr_cases.py
