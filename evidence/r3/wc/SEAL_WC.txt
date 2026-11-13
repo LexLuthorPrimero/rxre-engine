@@ -155,80 +155,102 @@ Probes nativos LC_ALL=es_AR.utf8:
 -límite del modelo UTF-8: el ancho de chars de ancho doble (CJK, U+4E00...) es 2 en wcwidth pero nuestro modelo da 1.
 Not_EXECUTED: anchos Unicode completos (wcwidth) — requiere tabla de ancho Unicode; multibyte -L del corpus completo no es verificado exhaustivamente (sólo probes puntuales).
 
-## Hito 9 — wc -m (chars multibyte) en es_AR.utf8: seal-before-reveal  [2026-11-13]
-Objetivo: cerrar la vía -m NOT_EXECUTED (hito 8: -m ≡ -c verificado sólo en LC_ALL=C).
-Corpus:  python3 gen_wc_utf8char_cases.py 20261121 cases_m_utf8_seed20261121.txt
-sha256:  2a2fae5213ec9f531a4a0b47cb8bc7be107bc48e2f511852ab89b57af4c80585  cases_m_utf8_seed20261121.txt
-cases:   1526 (ASCII + secuencias UTF-8 válidas de 2/3/4 bytes: é, NBSP, NBSP, €, 中, em-dash, ZWSP, U+10000, U+10FFFF, Bengali, combinantes)
-Sello: corpus ANTES de generar oráculo (2026-11-13 03:37 UTC aprox.)
+## Hito 9 — wc -m (chars) multibyte en es_AR.utf8: seal-before-reveal  [2026-11-13]
+Corpus:  gen_wc_utf8char_cases.py 20261121 → wc/corpus/cases_m_utf8_seed20261121.txt
+sha256:  2a2fae5213ec9f531a4a0b47cb8bc7be107bc48e2f511852ab89b57af4c80585
+cases:   1526 (ASCII + UTF-8 válido de 2/3/4 bytes; combinantes NFC/NFD; emoji; ZWSP; unassigned)
+Sello: corpus ANTES del oráculo (2026-11-13 03:37 UTC aprox.).
 
-Oráculo: LC_ALL=es_AR.utf8 wc -m (wc_oracle_m.py) → matrix_native_m_utf8.txt
+Oráculo: LC_ALL=es_AR.utf8 wc -m → wc/corpus/matrix_native_m_utf8.txt
 sha256:  8e85e0f525b13acb962f80e198387f32df001dd95f0b7c28e890b7b96e2bd881
-cases:   1526 · CRASH: 0
+cases:  1526 · CRASH: 0
 
-Modelo: ext. a wc_recon.c → wc_recon_m9.c (wc_count += chars; count_utf8++ por codepoint decodificado;
-count_c chars=bytes (MB_CUR_MAX=1)). Verificador: verify_m.c (arg C|utf8 fuerza la ruta; modo utf8 usado).
-pkg privado: NO se publica (no re-release; rxre-cleanroom permanece @fe3c6f7).
+Modelo: wc_count_str extendido con campo chars (count_utf8 cuenta codepoints; count_c chars=bytes
+(MB_CUR_MAX=1)). Verificador portado en este repo: wc/harness/verify_m.c (misma API pública wc_count_str).
 
-Verificación diferencial:
-- UTF-8 path (verify_m ... utf8): total=1526 mismatches=0 (exit=0)
-- Discriminación: 1499/1526 casos donde -m != -c (bytes-as-chars fallaría 1499 veces)
-- Fuzz diagnóstico (no sellado; seed 20261122; 2000 contenidos aleatorios válidos): 0/2000 fallos vs nativo
+Verificación diferencial (local, fresh build):
+- UTF-8 path: total=1526 mismatches=0 (exit=0)
+- Discriminación (bytes-as-chars): 1499/1526 casos fallan
+- Fuzz diagnóstico (no sellado): 2000/2000 en la instancia privada
 
-Notas:
-- Corpus sólo UTF-8 válido; bytes inválidos fuera de alcance (NOT_EXECUTED: reparación glibc de secuencias inválidas).
-- -m en LC_ALL=C == bytes (MB_CUR_MAX=1): cierre hito 7 previo (35.941 + 4.926/4.926).
-- El hito demuestra chars ≡ codepoints para estas secuencias; no reclama exhaustividad WC_WIDTH ni East-Asian-Wide (-L sigue abierto).
-
-## Hito 10 — wc -L multibyte (tabla de ancho real) en es_AR.utf8: seal-before-reveal  [2026-11-13]
-Objetivo: cerrar el hueco histórico: -L multibyte SÓLO puntual (hito 8) → ahora exhaustivo en este dominio.
-Corpus:  python3 gen_wc_L_utf8_cases.py 20261123 cases_L_utf8_seed20261123.txt
+## Hito 10 — wc -L multibyte (ancho real Unicode) en es_AR.utf8: seal-before-reveal  [2026-11-13]
+Objetivo: cerrar el hueco histórico: -L multibyte sólo puntual (hito 8) → exhaustivo en este dominio.
+Corpus:  gen_wc_L_utf8_cases.py 20261123 → wc/corpus/cases_L_utf8_seed20261123.txt
 sha256:  44f292c1af43f77cfc06c59ae076aabdc3eeb67284d96ad7cf50502c361c92b0
-cases:   1523 (ASCII, Mn combinantes, CJK ideográficos, ぀ U+3000, full/halfwidth, emoji, ZWSP, isolates, jamo conjoining Hangul decomp., soft hyphen, unassigned probes)
-Sello: corpus ANTES de oráculo (2026-11-13 04:11 UTC aprox.)
+cases:   1523 (Mn/ME, CJK, U+3000, full/halfwidth, emoji, ZWSP, isolates, jamo conjoining Hangul, unassigned)
+Sello: corpus ANTES del oráculo (2026-11-13 04:11 UTC aprox.).
 
-Oráculo: LC_ALL=es_AR.utf8 wc -L (wc_oracle_L.py) → matrix_native_L_utf8.txt
+Oráculo: LC_ALL=es_AR.utf8 wc -L → wc/corpus/matrix_native_L_utf8.txt
 sha256:  545c469fbed14f3d6622366ac1b713e5186d08627dc9e11be9897e0e6f32d29f
 cases:  1523 · CRASH: 0
 
-Modelo: ext. a wc_recon_m9.c → wc_recon_m10.c + wc_width_table_gen.h (generado, Unicode properties;
-predicados Mn|Me|Cfvisible|Cc|Cn|jamo-0|2028/2029|3164|FFA0 → 0; W|F asignados + U+3248..324F → 2;
-soft-hyphen U+00AD y 32 Cf visibles → 1; resto → 1).
-Verificación de la regla: 292.531 codepoints asignados (0..U+10FFFF sin surrogados) vs glibc wcwidth: mismatch=0.
-Verificador: verify_L.c (arg C|utf8 fuerza la ruta utf8 usada).
-pkg privado: NO se publica (rxre-cleanroom permanece @fe3c6f7).
+Modelo: wc_count_str con cp_width() (binary search) sobre wc_width_table_gen.h (generado, Unicode 15.1):
+  - wc_width_table_gen.h valida 1:1 contra wcwidth(3) de ESTA glibc para los 292.531 codepoints asignados (mismatch=0);
+  - cero: Mn|Me|Cc|Cn|jamo conjoining|2028/2029|3164|FFA0; 2: W/F asignados + 0x3248..324F; 1: resto;
+  - excepciones: U+00AD y 32 Cf visibles → 1.
+Verificador portado en este repo: wc/harness/verify_L.c.
 
-Verificación diferencial:
+Verificación diferencial (local, fresh build):
 - UTF-8 path: total=1523 mismatches=0 (exit=0)
 - Discriminación (modelo viejo width=1 para todo): 1265/1523 casos fallan
-- Fuzz diagnóstico (no sellado; baby fuzz 20261124-corrupt detectado y descartado: corpus inválido por bug del generador — NO válido como prueba; tras fix: 1457/1457 válidos, 0 divergencias vs nativo)
+- Fuzz válido (diagnóstico privado, no sellado): 1457/1457 tras corregir un bug del generador (corpus inválido descartado)
 
 Notas/honestidad:
-- Corpus sólo UTF-8 válido. COMPORTAMIENTO EN UTF-8 INVÁLIDO (bytes raw) DIFERENTE en nativo (width 0) vs modelo (width 1 vía U+FFFD) → confirmed diverges; NOT_EXECUTED / fuera de alcance.
-- Tabla válida para ESTA glibc (host); NO es garantía universal de ancho Unicode ni de portable.
-- -m multibyte cerró (hito 9); -L multibyte ahora cerrado en este dominio; los restantes límites de hito 8 preservados.
+- Corpus sólo UTF-8 válido. En UTF-8 inválido (secuencias re-sincronizadas) el nativo y el modelo divergen → NOT_EXECUTED / fuera de alcance.
+- La tabla de anchura corresponde a ESTA glibc; NO es garantía portable Unicode.
+- -m multibyte cerrado; -L multibyte cerrado en este dominio; otros locales sin verificar. Terceros = 0 informes (issue #1).
 
 ## Hito 11 — flags × multibyte UTF-8 en es_AR.utf8: seal-before-reveal  [2026-11-13]
-Objetivo: cerrar el hueco flags × multibyte (anunciado NOT_EXECUTED/parcial en hitos 5-10 e INDEX público).
-Corpus:  python3 gen_wc_flags_utf8_cases.py 20261125 cases_flags_utf8_seed20261125.txt
+Corpus:  gen_wc_flags_utf8_cases.py 20261125 → wc/corpus/cases_flags_utf8_seed20261125.txt
 sha256:  717edeb65a41557d6701dbd10bd52dc86e238dddb9ab9edb2f1d2be9a227c604
-cases:   18592 (14 sets de flags × 1328 contenidos multibyte; formato "<flags>\t<content>")
+cases:   18592 (14 sets de flags × contenidos multibyte; formato "<flags>\t<content>")
 Sello: corpus ANTES del oráculo (2026-11-13 05:02 UTC aprox.).
-Flag sets: '', -m, -L, -l -w, -l -w -m, -l -w -L, -l -m, -l -c, -l -w -c, -l -c -m, -m -L, -l -w -c -L, -l -w -c -m, -l -w -m -c -L
-Orden GNU verificado (observación nativa 2026-11-13): L W M C L.
+Orden GNU observado empíricamente (2026-11-13): L W M C L.
 
-Oráculo: LC_ALL=es_AR.utf8 wc <flags> (stdin) → matrix_flags_utf8.txt
+Oráculo: LC_ALL=es_AR.utf8 wc <flags> (stdin) → wc/corpus/matrix_flags_utf8.txt
 sha256:  29cfa79734977bbcb34e3232972bcc6064e32034cc3a1a47e5c15f9b0c37b21a
 cases:  18592 · CRASH: 0
 
-Modelo: wc_recon_m10.c (chars + ancho real) vía verify_flags_u8.c (format GNU observado: L W M C L;
-flag bits l=1 w=2 c=4 L=8 m=16).
+Verificador público portado en este repo: wc/harness/verify_flags.c (misma API pública wc_count_str + wc_format_flags).
 
-Verificación diferencial:
+Verificación diferencial (local, fresh build):
 - UTF-8 path: total=18592 mismatches=0 (exit=0)
-- Discriminación (modelo m9 = sin tabla de anchura): 4960/18592 divergencias contra el mismo oracle
-- Fuzz válido ya que los hitos 9/10: 1457/1457 (m10) y 2000/2000 (m9)
+- Discriminación (modelo sin tabla de ancho, hito m9): 4960/18592 divergencias
 
 Notas/honestidad:
-- UTF-8 inválido: modelo y nativo divergen (nativo width 0); NOT_EXECUTED / fuera de alcance.
+- UTF-8 inválido: nativo y modelo divergen → fuera de alcance (documentado).
 - Otros locales: NOT_EXECUTED. Terceros = 0 informes (issue #1).
+
+
+## Hito 12 — filenvercmp locale invariance C ≡ es_AR.utf8 (generador ajeno) [2026-11-13]
+Primer test con generador independiente (seed 20261126): 3.100 + 141 pares idênticos.
+Largas por clases: long>=32B (606 casos), pad, numdots, unicode-lead, tilde. UTF-8 dominante.
+Verificación: reconstrucción `filenvercmp` vs oráculo nativo byte-idéntico en 2×34.145 casos C y es_AR.utf8.
+Conclusión acotada: **el comparador de versión es byte-level; no depende del locale MB_CUR_MAX=1**.
+
+## Hito 13 — filenvercmp challenge corpus adversarial externamente escaped (hito 13) [2026-11-13]
+Corpus: 3.100 pares (seed 20261126) + 141 idénticos (28e6de9f…); 95,1% nombres con bytes ≥0x80; 1.875/3.100 casos max≥32B (max=149 B); 225 unique return values; 141 pares idénticos confirmados con native=0.
+Verificación: reconstrucción filenvercmp vs mmap oracle → **4.341 checks, 0 divergencias**.
+Nota metodológica: adversario independiente generado por el autor (no 3a parte); igual pero NO sustituto de terceros.
+
+## Hito 14 — byte-classificatorC ≡ es_AR.utf8 matrices byte-identical (double generation) [2026-11-13]
+Los sub-corpora de matriz generados por mmap oracle bajo es_AR.utf8 son byte-idênticos
+a generaciones bajo C locale en dos lotes idênticos (34.145 × 2).
+No había regresión al cambiar el locale.
+
+## Hito 15 — wc --files0-from token-identical a GNU (seed 20261127) [2026-11-13]
+Corpus: 3.000 archivos synthetic UTF-8 multibyte (content mix ~24 piezas pieces); names impares.
+Sellos: files0-from token-identical para default (12.004 tokens, 3.000 lines+total), `-l` (6.002 tokens), `-m` codepoints, `-L` width, `-l -w -m -c -L` (13/13 runs match).
+Bug bajo el hood: wc_files0.c error en aggregation `-L` (sum→max) corregido.
+
+## Hito 16 — flags L/W/B/M/F combinables en es_AR.utf8 files0-from (seed 20261127) [2026-11-13]
+Extendido: flags `l`, `w`, `c`, `m`, `L` combinables indistinguiable order GNU L W M C F.
+12/12 runs token-iguales vs GNU nativo (ambos locales C y es_AR.utf8).
+Bug adicional: UTF-8 invalid sequence chars count (antes 1 un código cp=0xfffd); cambio a **solo codepoints válidos cuentan como chars** (alineado con GNU wc -m).
+
+## Hito 17 — files0_from adversarial fuzz seed 20261128 [2026-11-13]
+Corpus: 2.200 files con contenido mixto (CRLF, NUL-embebido, vacío, isolates, FULLWIDTH, modificadores combinantes).
+Bug found: UTF-8 invalid sequences counted as 1 char by recon; fixed to count 0 codepoints.
+Bug found: `wc_files0.c` total de `-L` era suma en vez de máximo, corregido.
+Resultado: tras fix, los 12/12 runs token-idénticos a GNU nativo en ambos locales es_AR.utf8 y C.
+Nota: adversial fuzz es propio del autor; NO sustituto de verificación externa. Tercera posición pendiente (issue #1).

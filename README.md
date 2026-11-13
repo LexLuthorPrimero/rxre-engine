@@ -28,8 +28,8 @@ Only two targets exist, with sealed evidence inside `evidence/r3/`:
 
 | Target | Artifact | Corpus | Result |
 |---|---|---|---|
-| `filenvercmp` (sort = version) in `/usr/bin/ls` (sha256 `54e936d3…`) | semantic C reconstruction | 34,145 × 2 sealed pairs (seeds 20261112/13, 0 divergences, both generations) | ✓ byte-exact vs native |
-| `wc` in `/usr/bin/wc` (sha256 `81d61459…`) | semantic C reconstruction | C locale (default / flags / `-m` ≡ `-c` / `-L`) and es_AR.utf8 (NBSP/high bytes, `-m` multibyte, `-L` with real width table, flags×multibyte) | ✓ 0 divergences everywhere |
+| filenvercmp (sort = version) in /usr/bin/ls — sha256 54e936d3... | semantic C reconstruction | 34,145 x 2 sealed pairs (seeds 20261112/13, 0 divergences); adversarial challenge 3,100+141 / 0 divergences; locale-invariance byte-equal C ≡ es_AR.utf8; i18n black-box 200 names identity vs native ls -v | ok byte-exact vs native |
+| wc in /usr/bin/wc — sha256 81d61459... | semantic C reconstruction | C locale + es_AR.utf8; default / flags / -m multibyte / -L width / --files0-from / flags x multibyte / files0-from adversarial | ok 0 divergences vs native GNU |
 
 Details, logs and matrices live in `evidence/r3/` (`EXPEDIENTE_R3.md` is the full
 case file — Spanish).
@@ -48,7 +48,7 @@ Python test suites. Expected tail: `total=34145 mismatches=0` twice, eleven
 `total=… mismatches=0` lines for `wc`, `12 passed`, then `VERIFY: all steps passed`.
 
 Note: the `rxre-cleanroom` package exists so anyone can check on their own
-machine without this repo's structure: https://github.com/LexLuthorPrimero/rxre-cleanroom (MIT).
+machine without this repo's structure: https://github.com/LexLuthorPrimero/rxre-cleanroom — release v1.2.0 ([release](https://github.com/LexLuthorPrimero/rxre-cleanroom/releases/tag/v1.2.0)) (MIT).
 
 ## Repository layout
 
