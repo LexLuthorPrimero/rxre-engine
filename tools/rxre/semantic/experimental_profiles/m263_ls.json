@@ -1,0 +1,341 @@
+{
+  "profile_id": "m263-ls-202611",
+  "binary_sha256": "54e936d37decdad9ecaf189b1de347605a0a99037ec87bd17679b6cbde871a0c",
+  "binary": "GNU coreutils 9.10 ls (sealed reference, R3)",
+  "observation": "M262 GDB aislado + alcanzabilidad M263; dominio GDB probado; NOT_REACHED no equivale a UNREACHABLE_PROVEN",
+  "identity_status": "SEALED_REFERENCE",
+  "reachability": {
+    "0x392f|__libc_start_main": {
+      "r": "REACHED",
+      "e": "m263-got"
+    },
+    "0x6303|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0xd4a8|": {
+      "r": "NOT_REACHED",
+      "e": "m263-canon"
+    },
+    "0xd523|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x10366|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x103c3|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x10748|": {
+      "r": "NOT_REACHED",
+      "e": "m263-findentry"
+    },
+    "0x10777|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x107cb|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x11e5b|xstrcoll_name": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x11e5b|xstrcoll_size": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x11e5b|xstrcoll_mtime": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x11e5b|rev_xstrcoll_name": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x11e5b|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x11f7b|": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x12065|": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x12098|": {
+      "r": "REACHED",
+      "e": "m263-mpsort"
+    },
+    "0x1214f|print_and_abort": {
+      "r": "REACHED",
+      "e": "m262-obstack"
+    },
+    "0x122c0|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x122d3|": {
+      "r": "CONDITION_UNKNOWN",
+      "e": null
+    },
+    "0x122e1|print_and_abort": {
+      "r": "REACHED",
+      "e": "m262-obstack"
+    }
+  },
+  "causal": {
+    "m263-o-only": {
+      "input_conditions": [
+        "-o"
+      ],
+      "branch_predicates": [
+        "cmp byte [0x38512],0 en prline @0x65ae (axt)"
+      ],
+      "state_dependencies": [
+        "global 0x38512 escrito en main; 0x38508/0x384f0 axt"
+      ],
+      "memory_dependencies": [
+        "0x38512/0x38508/0x384f0"
+      ],
+      "causal_chain": [
+        "-o -> main(0x1ba4) -> BSS 0x38512=1 -> prline pasa 0x65ae -> 0x6589 REACHED_TARGET_UNRESOLVED; -H sin -o => NOT_REACHED"
+      ]
+    },
+    "m263-eg-fast": {
+      "input_conditions": [
+        "-G/-E sin prline `-o` en ese tramo"
+      ],
+      "branch_predicates": [
+        "r8==0 en entrada EGexecute"
+      ],
+      "state_dependencies": [
+        "arg r8"
+      ],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "r8==0 -> 0x9c5f bmexec (observado)"
+      ]
+    },
+    "m263-eg-slow": {
+      "input_conditions": [
+        "patrones probados: hello,h.*o,he+o,[h]ello,hello|world con -G/-E +/- -o -> 0x9d58/0x9dcb NO alcanzados"
+      ],
+      "branch_predicates": [
+        "r8!=0 necesario; EGexecute r8!=0 observado tras prline pero callsite lento no alcanzado"
+      ],
+      "state_dependencies": [
+        "arg r8"
+      ],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "NO observado; CONDITION_UNKNOWN para destino"
+      ]
+    },
+    "m263-kws": {
+      "input_conditions": [
+        "-F/-G/-f probados; GEAcompile si, kwsprep no"
+      ],
+      "branch_predicates": [
+        "predicado interno kwsprep no alcanzado"
+      ],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "GEAcompile(0xda80) REACHED, kwsprep(0xbee7/0xbf03) NOT_REACHED en dominio probado"
+      ]
+    },
+    "m263-hash-cold": {
+      "input_conditions": [
+        "-r + --exclude-from pats_many (500)"
+      ],
+      "branch_predicates": [
+        "rehash/colision en hash_find_entry"
+      ],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "many patrones -> hash_find_entry 0xfbdb -> string_compare @0xf9d0 (NOT_IN_INVENTORY)"
+      ]
+    },
+    "m263-transfer": {
+      "input_conditions": [
+        "idem hash-cold"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "transfer_entries 0xfd6a -> string_hasher @0xf370"
+      ]
+    },
+    "m263-obstack": {
+      "input_conditions": [
+        "-F -f pats_many"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [
+        "obstack rbx+0x40"
+      ],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "rpl_obstack_newchunk 0x11a45 -> xmalloc @0x15850 REACHED"
+      ]
+    },
+    "m263-addexcl": {
+      "input_conditions": [
+        "--exclude-from (file o -)"
+      ],
+      "branch_predicates": [
+        "pus() regexec?"
+      ],
+      "state_dependencies": [
+        "stack var_50h"
+      ],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "add_exclude_fp 0x16d94 -> rax=*([rbp-0x48])=add_exclude @0x17ac0 REACHED"
+      ]
+    },
+    "m263-fts": {
+      "input_conditions": [
+        "-r/-R/-d recurse/ftsdir 50 files probados"
+      ],
+      "branch_predicates": [
+        "fts_build alcanzado; bloque 0x19848 (lea f4a0) -> 0x1985d no alcanzado"
+      ],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "fts_sort callsite 0x1985d NOT_REACHED; se conserva UNRESOLVED directo"
+      ]
+    },
+    "m263-mpsort": {
+      "input_conditions": [
+        "ls con >=3 entradas (lsdir10); <=2 => NOT_REACHED"
+      ],
+      "branch_predicates": [
+        "n_entradas>=3"
+      ],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "mpsort 0x11e5b (xstrcoll) y secundarios REACHED solo en >=3"
+      ]
+    },
+    "m263-findentry": {
+      "input_conditions": [
+        "ls bigdir/--group/--color probados -> 0x10748 NO alcanzado"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "find_entry callsite NOT_REACHED en dominio probado"
+      ]
+    },
+    "m263-canon": {
+      "input_conditions": [
+        "--quoting-style/-D/-L/--block-size probados -> 0xd4a8 NO alcanzado"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "canonicalize NOT_REACHED en dominio probado"
+      ]
+    },
+    "m262-die": {
+      "input_conditions": [
+        "M262 temporal"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "die 0xcfec REACHED (M262)"
+      ]
+    },
+    "m262-hash": {
+      "input_conditions": [
+        "M262 GDB"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "hash REACHED (M262)"
+      ]
+    },
+    "m262-obstack": {
+      "input_conditions": [
+        "M262 GDB"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "obstack REACHED (M262)"
+      ]
+    },
+    "m262-excl": {
+      "input_conditions": [
+        "M262"
+      ],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "excluded_file_name REACHED (M262)"
+      ]
+    },
+    "m263-matcher": {
+      "input_conditions": [
+        "-G/-E/-F/-P y mixto"
+      ],
+      "branch_predicates": [
+        "r8 selecciona dispatcher"
+      ],
+      "state_dependencies": [
+        "r8/argv"
+      ],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "main 0x250c/0x254a REACHED -> compile+EGexecute/Fexecute/Pexecute"
+      ]
+    },
+    "m263-got": {
+      "input_conditions": [],
+      "branch_predicates": [],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "GOT RESOLVED_STATIC preservado"
+      ]
+    },
+    "m263-grepbuf-r8": {
+      "input_conditions": [],
+      "branch_predicates": [
+        "r8 (xor r8d @0x6ae8)"
+      ],
+      "state_dependencies": [],
+      "memory_dependencies": [],
+      "causal_chain": [
+        "grepbuf 0x6aff REACHED"
+      ]
+    }
+  },
+  "blocked_observability_callsites": [
+    "0x1214f",
+    "0x122e1"
+  ],
+  "causal_experiment_ids": [
+    "m263-mpsort"
+  ]
+}

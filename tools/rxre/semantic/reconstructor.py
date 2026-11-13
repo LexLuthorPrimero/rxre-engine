@@ -16,6 +16,7 @@ if PKG not in sys.path:
     sys.path.insert(0, PKG)
 
 from backends.adapters import rz_functions, rz_cfg, rz_xrefs
+from rxre.semantic.profiles import load_profile_for, lookup_reachability, causal_entry
 
 
 def _sha256_file(path: str) -> str:
@@ -873,85 +874,9 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     return report
 
 
-import copy
-
-# M263: alcanzabilidad causal separada de resolucion. No inventa destinos.
-# REACHED* = observado GDB M262/M263; NOT_REACHED = callsite no alcanzado en dominio probado;
-# CONDITION_UNKNOWN = sin experimento discriminante; REACHED_TARGET_UNRESOLVED = callsite alcanzado sin destino.
-_M263_GREP = {
-    # (callsite_hex, target_or_None) -> dict ; None = contexto estatio sin destino
-    ("0x250c", "sym.GEAcompile"): dict(r="REACHED", e="m263-matcher"), ("0x250c","Fcompile"): dict(r="REACHED", e="m263-matcher"),
-    ("0x250c","Pcompile"): dict(r="REACHED", e="m263-matcher"), ("0x250c", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x254a", "sym.EGexecute"): dict(r="REACHED", e="m263-matcher"), ("0x254a","Fexecute"): dict(r="REACHED", e="m263-matcher"),
-    ("0x254a","Pexecute"): dict(r="REACHED", e="m263-matcher"), ("0x254a", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x349f", "__libc_start_main"): dict(r="REACHED", e="m263-got"),
-    ("0x6589", None): dict(r="REACHED_TARGET_UNRESOLVED", e="m263-o-only"),
-    ("0x6aff", "sym.EGexecute"): dict(r="REACHED", e="m263-grepbuf-r8"), ("0x6aff","Fexecute"): dict(r="REACHED", e="m263-grepbuf-r8"),
-    ("0x6aff", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x9c5f", "bmexec"): dict(r="REACHED", e="m263-eg-fast"), ("0x9c5f", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x9d58", None): dict(r="NOT_REACHED", e="m263-eg-slow"), ("0x9dcb", None): dict(r="NOT_REACHED", e="m263-eg-slow"),
-    ("0xbee7", None): dict(r="NOT_REACHED", e="m263-kws"), ("0xbf03", None): dict(r="NOT_REACHED", e="m263-kws"),
-    ("0xcfec", "sym.null_action"): dict(r="REACHED", e="m262-die"), ("0xcfec", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0xfb54", "hash_pattern"): dict(r="REACHED", e="m262-hash"), ("0xfb54","AD_hash"): dict(r="REACHED", e="m262-hash"),
-    ("0xfb54", None): dict(r="CONDITION_UNKNOWN", e=None), ("0xfb83","AD_compare"): dict(r="REACHED", e="m262-hash"),
-    ("0xfb83", None): dict(r="CONDITION_UNKNOWN", e=None), ("0xfbdb", None): dict(r="REACHED", e="m263-hash-cold"),
-    ("0xfc5a","dev_type_hash"): dict(r="REACHED", e="m262-hash"),
-    ("0xfc83", None): dict(r="CONDITION_UNKNOWN", e=None), ("0xfd6a", None): dict(r="REACHED", e="m263-transfer"),
-    ("0xfdca", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x111e3","free"): dict(r="REACHED", e="m262-hash"),
-    ("0x11a45", None): dict(r="REACHED", e="m263-obstack"), ("0x11acc", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x11af6", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x11b03", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x11b08","print_and_abort.lto_priv"): dict(r="REACHED", e="m262-obstack"),
-    ("0x16b6f","fnmatch"): dict(r="REACHED", e="m262-excl"), ("0x16d94", None): dict(r="REACHED", e="m263-addexcl"),
-    ("0x1985d", None): dict(r="NOT_REACHED", e="m263-fts"),
-}
-_M263_LS = {
-    ("0x392f", "__libc_start_main"): dict(r="REACHED", e="m263-got"),
-    ("0x6303", None): dict(r="CONDITION_UNKNOWN", e=None), ("0xd4a8", None): dict(r="NOT_REACHED", e="m263-canon"),
-    ("0xd523", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x10366", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x103c3", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x10748", None): dict(r="NOT_REACHED", e="m263-findentry"),
-    ("0x10777", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x107cb", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x11e5b","xstrcoll_name"): dict(r="REACHED", e="m263-mpsort"), ("0x11e5b","xstrcoll_size"): dict(r="REACHED", e="m263-mpsort"),
-    ("0x11e5b","xstrcoll_mtime"): dict(r="REACHED", e="m263-mpsort"), ("0x11e5b","rev_xstrcoll_name"): dict(r="REACHED", e="m263-mpsort"),
-    ("0x11e5b", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x11f7b", None): dict(r="REACHED", e="m263-mpsort"),
-    ("0x12065", None): dict(r="REACHED", e="m263-mpsort"), ("0x12098", None): dict(r="REACHED", e="m263-mpsort"),
-    ("0x1214f","print_and_abort"): dict(r="REACHED", e="m262-obstack"), ("0x122c0", None): dict(r="CONDITION_UNKNOWN", e=None),
-    ("0x122d3", None): dict(r="CONDITION_UNKNOWN", e=None), ("0x122e1","print_and_abort"): dict(r="REACHED", e="m262-obstack"),
-}
-# Condiciones causales (observacion vs inferencia marcadas)
-_M263_CAUSAL = {
-    "m263-o-only": dict(io=["-o (only_matching) requerido para prline+393"], bp=["byte [data.00038512]!=0 @0x65ae"], sd=["global 0x38512"], cc=["main flag -o -> 0x38512=1 -> prline pasa 0x65ae -> callsite 0x6589"]),
-    "m263-matchergrep_r8": dict(io=["-G/-E/-F tipo regex"], bp=["r8==0 => EGexecute directo; r8!=0 => 0x9d58/9dcb lento"], sd=["arg r8"], cc=[]),
-}
-def _m263_lookup(path, cs, tgt):
-    tab = _M263_GREP if "grep" in str(path) else _M263_LS
-    return tab.get((cs, tgt), tab.get((cs, None)))
-
-def _m263_causal(eid):
-    D = {
-     "m263-o-only": dict(input_conditions=["-o"], branch_predicates=["cmp byte [0x38512],0 en prline @0x65ae (axt)"], state_dependencies=["global 0x38512 escrito en main; 0x38508/0x384f0 axt"], memory_dependencies=["0x38512/0x38508/0x384f0"], causal_chain=["-o -> main(0x1ba4) -> BSS 0x38512=1 -> prline pasa 0x65ae -> 0x6589 REACHED_TARGET_UNRESOLVED; -H sin -o => NOT_REACHED"]),     "m263-eg-fast": dict(input_conditions=["-G/-E sin prline `-o` en ese tramo"], branch_predicates=["r8==0 en entrada EGexecute"], state_dependencies=["arg r8"], memory_dependencies=[], causal_chain=["r8==0 -> 0x9c5f bmexec (observado)"]),
-     "m263-eg-slow": dict(input_conditions=["patrones probados: hello,h.*o,he+o,[h]ello,hello|world con -G/-E +/- -o -> 0x9d58/0x9dcb NO alcanzados"], branch_predicates=["r8!=0 necesario; EGexecute r8!=0 observado tras prline pero callsite lento no alcanzado"], state_dependencies=["arg r8"], memory_dependencies=[], causal_chain=["NO observado; CONDITION_UNKNOWN para destino"]),
-     "m263-kws": dict(input_conditions=["-F/-G/-f probados; GEAcompile si, kwsprep no"], branch_predicates=["predicado interno kwsprep no alcanzado"], state_dependencies=[], memory_dependencies=[], causal_chain=["GEAcompile(0xda80) REACHED, kwsprep(0xbee7/0xbf03) NOT_REACHED en dominio probado"]),
-     "m263-hash-cold": dict(input_conditions=["-r + --exclude-from pats_many (500)"], branch_predicates=["rehash/colision en hash_find_entry"], state_dependencies=[], memory_dependencies=[], causal_chain=["many patrones -> hash_find_entry 0xfbdb -> string_compare @0xf9d0 (NOT_IN_INVENTORY)"]),
-     "m263-transfer": dict(input_conditions=["idem hash-cold"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["transfer_entries 0xfd6a -> string_hasher @0xf370"]),
-     "m263-obstack": dict(input_conditions=["-F -f pats_many"], branch_predicates=[], state_dependencies=["obstack rbx+0x40"], memory_dependencies=[], causal_chain=["rpl_obstack_newchunk 0x11a45 -> xmalloc @0x15850 REACHED"]),
-     "m263-addexcl": dict(input_conditions=["--exclude-from (file o -)"], branch_predicates=["pus() regexec?"], state_dependencies=["stack var_50h"], memory_dependencies=[], causal_chain=["add_exclude_fp 0x16d94 -> rax=*([rbp-0x48])=add_exclude @0x17ac0 REACHED"]),
-     "m263-fts": dict(input_conditions=["-r/-R/-d recurse/ftsdir 50 files probados"], branch_predicates=["fts_build alcanzado; bloque 0x19848 (lea f4a0) -> 0x1985d no alcanzado"], state_dependencies=[], memory_dependencies=[], causal_chain=["fts_sort callsite 0x1985d NOT_REACHED; se conserva UNRESOLVED directo"]),
-     "m263-mpsort": dict(input_conditions=["ls con >=3 entradas (lsdir10); <=2 => NOT_REACHED"], branch_predicates=["n_entradas>=3"], state_dependencies=[], memory_dependencies=[], causal_chain=["mpsort 0x11e5b (xstrcoll) y secundarios REACHED solo en >=3"]),
-     "m263-findentry": dict(input_conditions=["ls bigdir/--group/--color probados -> 0x10748 NO alcanzado"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["find_entry callsite NOT_REACHED en dominio probado"]),
-     "m263-canon": dict(input_conditions=["--quoting-style/-D/-L/--block-size probados -> 0xd4a8 NO alcanzado"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["canonicalize NOT_REACHED en dominio probado"]),
-     "m262-die": dict(input_conditions=["M262 temporal"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["die 0xcfec REACHED (M262)"]),
-     "m262-hash": dict(input_conditions=["M262 GDB"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["hash REACHED (M262)"]),
-     "m262-obstack": dict(input_conditions=["M262 GDB"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["obstack REACHED (M262)"]),
-     "m262-excl": dict(input_conditions=["M262"], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["excluded_file_name REACHED (M262)"]),
-     "m263-matcher": dict(input_conditions=["-G/-E/-F/-P y mixto"], branch_predicates=["r8 selecciona dispatcher"], state_dependencies=["r8/argv"], memory_dependencies=[], causal_chain=["main 0x250c/0x254a REACHED -> compile+EGexecute/Fexecute/Pexecute"]),
-     "m263-got": dict(input_conditions=[], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["GOT RESOLVED_STATIC preservado"]),
-     "m263-grepbuf-r8": dict(input_conditions=[], branch_predicates=["r8 (xor r8d @0x6ae8)"], state_dependencies=[], memory_dependencies=[], causal_chain=["grepbuf 0x6aff REACHED"]),
-    }
-    if eid is None: return dict(input_conditions=[], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["sin experimento discriminante en M263"])
-    return D.get(eid, dict(input_conditions=[], branch_predicates=[], state_dependencies=[], memory_dependencies=[], causal_chain=["sin experimento"]))
-
 def m263_enrich(report):
     bid = report.get("artifact",{}).get("path","") or report.get("artifact",{}).get("binary","") or ""
+    profile, bsha = load_profile_for(bid) if bid else (None, None)
     cg = report["callgraph"]
     flat=[]
     counts={}
@@ -960,12 +885,10 @@ def m263_enrich(report):
         cs="0x%x"%e["source_offset"]
         for c in e.get("contextual_resolutions",[]):
             tgt=c.get("target_symbol")
-            key=(cs,tgt)
-            tab=_M263_GREP if "grep" in str(bid) else _M263_LS
-            lk=tab.get(key) or tab.get((cs,None)) or dict(r="CONDITION_UNKNOWN", e=None)
+            lk=lookup_reachability(profile, cs, tgt)
             reach=lk.get("r","CONDITION_UNKNOWN")
             ev=lk.get("e")
-            caus=_m263_causal(ev if ev else c.get("context_inputs",{}).get("context"))
+            caus=causal_entry(profile, ev if ev else c.get("context_inputs",{}).get("context"))
             # fts_sort conserva UNRESOLVED pero reachability NOT_REACHED
             counts[reach]=counts.get(reach,0)+1
             c["reachability_status"]=reach
@@ -980,24 +903,31 @@ def m263_enrich(report):
             c["epistemic_status"]=c.get("epistemic_status")
             c["limitations"]=list(c.get("limitations") or [])+["M263 reachability separada de resolucion; observacion dinamica no demuestra universalidad; probar dominio declarado."]
             flat.append({"binary_sha256":c.get("binary_sha256"),"callsite_offset":e["source_offset"],"caller_offset":c.get("caller_offset"),"target_address":c.get("target_address"),"target_symbol":tgt,"context_id":c.get("context_id"),"reachability_status":reach,"input_conditions":c["input_conditions"],"branch_predicates":c["branch_predicates"],"state_dependencies":c["state_dependencies"],"memory_dependencies":c["memory_dependencies"],"causal_chain":c["causal_chain"],"experiment_id":c["experiment_id"],"evidence_refs":c["evidence_refs"],"epistemic_status":c.get("epistemic_status"),"limitations":c["limitations"]})
+    blocked_obs = set((profile or {}).get("blocked_observability_callsites", []))
+    causal_ids = set((profile or {}).get("causal_experiment_ids", []))
+    profile_note = (f"perfil experimental aplicado: {profile.get('profile_id')} (hash {bsha[:12]}…)"
+                    if profile else "sin perfil experimental aplicable a este binario (identidad no verificable aquí) — análisis genérico, sin conocimiento histórico")
     # M268: dimensiones Observability + Domain + Causality separadas (retrocompatible).
-    for _c in [c for _e in cg["edges"] if _e.get("call_type") in ("CALL_INDIRECT","CALL_UNRESOLVED") for c in _e.get("contextual_resolutions",[])]:
-        _cs="0x%x"%_c.get("callsite_offset",0) if _c.get("callsite_offset") is not None else ""
-        _r=_c.get("reachability_status","CONDITION_UNKNOWN")
-        _ev=_c.get("experiment_id") or "none"
-        if _cs in ("0xcfec","0x11b08","0x1214f","0x122e1"): _c["observability_status"]="OBSERVATION_BLOCKED_BY_OPERATIONAL_CONSTRAINT"
-        elif _r in ("REACHED","REACHED_TARGET_UNRESOLVED","NOT_REACHED"): _c["observability_status"]="OBSERVED"
-        else: _c["observability_status"]="INSUFFICIENT_INSTRUMENTATION"
-        if _cs in ("0xcfec","0x11b08","0x1214f","0x122e1"): _c["domain_status"]="OPERATIONALLY_RESTRICTED"
-        else: _c["domain_status"]="FINITE_PARTIAL" if _r!="CONDITION_UNKNOWN" else "OPEN_DOMAIN"
-        if _ev in ("m263-matcher","m263-grepbuf-r8","m263-mpsort","m263-eg-fast","m263-addexcl","m263-hash-cold"): _c["causality_result"]="CAUSAL"
-        elif _r in ("REACHED","REACHED_TARGET_UNRESOLVED","NOT_REACHED"): _c["causality_result"]="STATIC_SUPPORTED"
-        else: _c["causality_result"]="NOT_DETERMINED"
+    for _e in cg["edges"]:
+        if _e.get("call_type") not in ("CALL_INDIRECT","CALL_UNRESOLVED"): continue
+        _cs="0x%x"%_e.get("source_offset",0) or ""
+        for _c in _e.get("contextual_resolutions",[]):
+            _r=_c.get("reachability_status","CONDITION_UNKNOWN")
+            _ev=_c.get("experiment_id") or "none"
+            if _cs in blocked_obs: _c["observability_status"]="OBSERVATION_BLOCKED_BY_OPERATIONAL_CONSTRAINT"
+            elif _r in ("REACHED","REACHED_TARGET_UNRESOLVED","NOT_REACHED"): _c["observability_status"]="OBSERVED"
+            else: _c["observability_status"]="INSUFFICIENT_INSTRUMENTATION"
+            if _cs in blocked_obs: _c["domain_status"]="OPERATIONALLY_RESTRICTED"
+            else: _c["domain_status"]="FINITE_PARTIAL" if _r!="CONDITION_UNKNOWN" else "OPEN_DOMAIN"
+            if _ev in causal_ids: _c["causality_result"]="CAUSAL"
+            elif _r in ("REACHED","REACHED_TARGET_UNRESOLVED","NOT_REACHED"): _c["causality_result"]="STATIC_SUPPORTED"
+            else: _c["causality_result"]="NOT_DETERMINED"
     for _f in flat:
         for _c in [c for _e in cg["edges"] if _e.get("call_type") in ("CALL_INDIRECT","CALL_UNRESOLVED") for c in _e.get("contextual_resolutions",[]) if c.get("context_id")==_f["context_id"]]:
             _f["observability_status"]=_c["observability_status"]; _f["domain_status"]=_c["domain_status"]; _f["causality_result"]=_c["causality_result"]
-    cg["causal_analysis"]={"contract":"M263+M268: reachability_status por contexto separado de epistemic_status M262; sin duplicar CFG/callgraph; fts_sort directo permanece UNRESOLVED.","counts_by_reachability":dict(counts),"total_contexts":len(flat),"flat":flat,"note":"REACHED=observado; NOT_REACHED=domain probado sin alcance; CONDITION_UNKNOWN=sin experimento; REACHED_TARGET_UNRESOLVED=callsite sin destino."}
-    report["limitations"]=list(report.get("limitations") or [])+["M263: alcanzabilidad causal acotada al dominio GDB probado; NOT_REACHED no equivale a UNREACHABLE_PROVEN."]
+    cg["causal_analysis"]={"profile": profile_note, "contract":"M263+M268: reachability_status por contexto separado de epistemic_status M262; sin duplicar CFG/callgraph; fts_sort directo permanece UNRESOLVED.","counts_by_reachability":dict(counts),"total_contexts":len(flat),"flat":flat,"note":"REACHED=observado; NOT_REACHED=domain probado sin alcance; CONDITION_UNKNOWN=sin experimento; REACHED_TARGET_UNRESOLVED=callsite sin destino."}
+    report["profile_application"] = profile_note
+    report["limitations"]=list(report.get("limitations") or [])+["M263: alcanzabilidad causal acotada al dominio GDB probado; NOT_REACHED no equivale a UNREACHABLE_PROVEN; " + profile_note + "."]
     return report
 
 
