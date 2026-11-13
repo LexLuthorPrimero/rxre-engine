@@ -77,7 +77,9 @@ PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_contrato_uniforme.py" \
   "$ROOT/tools/rxre/tests/test_reproducibilidad_end2end.py" \
   "$ROOT/tools/rxre/tests/test_semantica_estructural_contraste.py" \
-  "$ROOT/tools/rxre/tests/test_replay_mision.py" -q)
+  "$ROOT/tools/rxre/tests/test_replay_mision.py" \
+  "$ROOT/tools/rxre/tests/test_replay_matrix.py" \
+  "$ROOT/tools/rxre/tests/test_evidence_gate_matrix.py" -q)
 printf '%s\n' "$PYTEST_OUT"
 PYTEST_COUNT=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ passed' | awk '{print $1}')
 

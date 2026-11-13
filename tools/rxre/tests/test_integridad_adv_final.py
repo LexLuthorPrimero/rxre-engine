@@ -48,9 +48,16 @@ def test_4_archivo_vacio():
 
 def test_5_archivo_otro_artefacto():
     repo_root = Path(__file__).resolve().parents[3]
-    # Simular resultado de otro artefacto sin alterar evidencia canónica
-    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared"}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"))
-    assert res["contract_state"] == "COMPLETE"
+    # Evidencia (/bin/ls) solicitada para OTRO artefacto (/usr/bin/wc): ligadura debe fallar
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared"}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/usr/bin/wc")
+    assert res["contract_state"] != "COMPLETE", f"evidencia ajena no puede aceptar: {res}"
+    assert res["epistemic"] != "VALID"
+
+def test_5b_evidencia_target_coinciden_aceptada():
+    repo_root = Path(__file__).resolve().parents[3]
+    # Evidencia (/bin/ls) vinculada al artefacto solicitado (/bin/ls == /usr/bin/ls): pasa la puerta y acepta
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared"}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
+    assert res["contract_state"] == "COMPLETE", f"evidencia vinculada e íntegra debe aceptar: {res}"
     assert res["epistemic"] == "VALID"
 
 def test_6_evidencia_correcta_aceptada():

@@ -62,11 +62,18 @@ def analyze_dependencies(op_id: str, evidence_path: str = None) -> dict:
         else:
             dependencies.append({"name": "artefacto", "value": None, "relevant": True, "missing": True,
                                  "requested_target": target_str or None})
-        # Dependencia 2: versión herramienta (respuesta de DB)
+        # Dependencia 2: versión herramienta (respuesta de DB) — dependencia dura
         backend = resp.get("backend", {}) if isinstance(resp, dict) else {}
-        tool_version = backend.get("tool_version", "")
-        repo_commit = backend.get("repository_commit", "")
-        dependencies.append({"name": "tool_version", "value": tool_version[:60], "relevant": True})
+        tool_version = (backend.get("tool_version") or "").strip()
+        repo_commit = (backend.get("repository_commit") or "").strip()
+        if tool_version:
+            dependencies.append({"name": "tool_version", "value": tool_version[:60], "relevant": True})
+        else:
+            dependencies.append({"name": "tool_version", "value": None, "relevant": True, "missing": True})
+        if repo_commit:
+            dependencies.append({"name": "repository_commit", "value": repo_commit[:12], "relevant": True})
+        else:
+            dependencies.append({"name": "repository_commit", "value": None, "relevant": True, "missing": True})
         # Dependencia 3: evidencia estructural asistida — búsqueda por nombre de artefacto entre evidencias conocidas
         ev_candidates = []
         audit_dir = Path("audit/evidence")
@@ -147,8 +154,21 @@ def plan_reinvestigation(op_id: str, evidence_path: str = None) -> dict:
     return plan
 
 def verify_reinvestigation(plan: dict, result: dict) -> dict:
-    """VERIFICACIÓN DE REINVESTIGACIÓN — clasifica RESOLVED / UNRESOLVED / INVALID_RESULT."""
-    # Validación estructural del resultado
+    """VERIFICACIÓN DE REINVESTIGACIÓN — semántica estricta (fail-closed).
+
+    Resolución exige, además de operación coincidente e integridad de evidencia:
+    - Evidencia verificable (hash+tamaño+esquema) vinculada al artefacto solicitado.
+    - Acción de plan ejecutada con resultado que SATISFACE su condición.
+    - Ningún dry_run puede resolverse.
+    - Dependencias verificadas de verdad (no por omisión).
+    """
+    if not isinstance(result, dict) or not result:
+        return {"plan_op_id": plan.get("op_id") if isinstance(plan, dict) else None,
+                "verification_status": "NOT_DETERMINED",
+                "motivo": "resultado ausente; no se afirma nada",
+                "dependencias_verificadas": False,
+                "evidencia_integridad": False,
+                "reducida_incertidumbre": False}
     verification = {
         "plan_op_id": plan.get("op_id"),
         "result_op_id": result.get("op_id"),
@@ -160,41 +180,52 @@ def verify_reinvestigation(plan: dict, result: dict) -> dict:
         "dependencias_verificadas": False,
         "evidencia_integridad": False,
         "reducida_incertidumbre": False,
-        "limitacion": plan.get("limitacion")
+        "limitacion": plan.get("limitacion") if isinstance(plan.get("limitacion"), str) else None
     }
-    # 1. Verificar que el resultado corresponde al plan
     if verification["plan_op_id"] != verification["result_op_id"]:
         verification["verification_status"] = "INVALID_RESULT"
         verification["motivo"] = "operación del resultado no coincide con el plan"
         verification["evidencia_resultado"] = "op_id mismatch"
         return verification
-    # 2. Verificar integridad de evidencia (hash, esquema)
-    evidence_path = result.get("evidence_path") or plan.get("evidence_path")
-    evidence_integrity = True
-    if evidence_path:
-        from rxre.core.evidence_integrity import validate_evidence_path
-        v = validate_evidence_path(str(evidence_path))
-        evidence_integrity = bool(v["ok"])
-    verification["evidencia_integridad"] = evidence_integrity
-    # 3. Verificar condición del plan
-    condition = verification["condicion_plan"] or ""
-    action = verification["plan_action"]
-    res_class = result.get("classification", result.get("reproducible", ""))
-    if action == "conservar" and verification["evidencia_integridad"]:
-        verification["verification_status"] = "RESOLVED"
-        verification["motivo"] = "dependencias verificadas y compatibles; evidencia intacta; no requiere repetición"
-        verification["reducida_incertidumbre"] = True
-    elif action == "reevaluar" and verification["evidencia_integridad"]:
-        verification["verification_status"] = "RESOLVED"
-        verification["motivo"] = "dependencia STALE verificada; evidencia actualizada o consistente con reevaluación"
-        verification["reducida_incertidumbre"] = True
-    elif action == "investigar" and verification["evidencia_integridad"]:
+    # dry_run jamás agota la acción que debía resolver el problema
+    if result.get("dry_run") is True:
         verification["verification_status"] = "UNRESOLVED"
-        verification["motivo"] = "plan de investigación no reduce incertidumbre; falta verificación de dependencias relevantes"
+        verification["motivo"] = "dry_run no ejecuta la acción del plan; la incertidumbre no se reduce"
+        return verification
+    # 2. Integridad de evidencia vinculada (nunca asumida por omisión)
+    evidence_path = result.get("evidence_path") or plan.get("evidence_path")
+    if not evidence_path:
+        verification["verification_status"] = "BLOCKED"
+        verification["motivo"] = "sin evidencia enlazada al plan/resultado; no se afirma resolución"
+        return verification
+    from rxre.core.evidence_integrity import validate_evidence_path
+    scan_target = result.get("artefacto_reconstruido")
+    if not scan_target and isinstance(result.get("replay_result"), dict):
+        scan_target = result["replay_result"].get("artefacto_reconstruido")
+    v = validate_evidence_path(str(evidence_path), scan_target or None)
+    evidence_integrity = bool(v["ok"])
+    verification["evidencia_integridad"] = evidence_integrity
+    if not evidence_integrity:
+        verification["verification_status"] = "REJECTED"
+        verification["motivo"] = "evidencia inválida o no vinculada al artefacto solicitado: " + ", ".join(v["errors"][:3])
+        return verification
+    # 3. La condición del plan DEBE estar demostrada por el resultado
+    action = verification["plan_action"]
+    res_class = result.get("classification") or result.get("reproducible") or ""
+    deps_verified = bool(result.get("dependencias_verificadas") is True)
+    condition_ok = bool(result.get("condition_satisfied") is True) or (isinstance(res_class, str) and res_class in ("VALID", "RESOLVED")) or (res_class is True)
+    verification["dependencias_verificadas"] = deps_verified
+    if action in ("conservar", "reevaluar") and condition_ok and (deps_verified or res_class is True or (isinstance(res_class, str) and res_class in ("VALID", "RESOLVED"))):
+        verification["verification_status"] = "RESOLVED"
+        verification["motivo"] = "condición del plan satisfecha con evidencia vinculada e íntegra"
+        verification["reducida_incertidumbre"] = True
+    elif action == "investigar":
+        verification["verification_status"] = "UNRESOLVED"
+        verification["motivo"] = "plan de investigación no demuestra la condición requerida"
         verification["reducida_incertidumbre"] = False
     else:
         verification["verification_status"] = "UNRESOLVED"
-        verification["motivo"] = "resultado no satisface la condición del plan o evidencia alterada/incompleta"
+        verification["motivo"] = "el resultado no demuestra la condición del plan (clasificación/verificación insuficiente)"
         verification["reducida_incertidumbre"] = False
     return verification
 
@@ -303,21 +334,53 @@ def replay_operacion(op_id: str) -> dict:
                     "error": "fail-closed: el artefacto actual no coincide con la identidad registrada; no se ejecutó el backend",
                     "differences": ["artefact_identity_mismatch"]}
 
-        # Ejecución sólo con identidad consistente (o sin identidad registrada: declarar)
+        # Ejecución sólo con identidad verificable (fail-closed si falta)
+        if not hash_reference:
+            return {"status": "blocked_insufficient_identity", "op_id": op_id,
+                    "reproducible": False, "operacion": operacion, "capability": capability,
+                    "requested": art_path, "hash_actual": hash_actual,
+                    "requested_artifact": art,
+                    "error": "replay abortado: no hay identidad registrada (request/response/evidencia vinculada) que permita reconstruir qué se ejecutó originalmente; no se ejecuta el backend",
+                    "differences": ["missing_operation_identity"]}
         result_replay = {"artefacto_reconstruido": art, "hash_actual": hash_actual,
                          "hash_reference": hash_reference,
-                         "hash_gate": "ok" if hash_reference else "no_recorded_identity"}
+                         "hash_gate": "ok"}
         try:
             res = ejecutar(capability, {"artefacto": art, "timeout": 10})
-            result_replay["reproducible"] = (res.get("status") == "ok")
             result_replay["replay_status"] = res.get("status")
             result_replay["differences"] = []
-            if result_replay.get("reproducible"):
-                result_replay["differences"].append("reproducible_structural")
+            # Comparación original vs replay (huella estructural del resultado)
+            original = None
+            if isinstance(resp, dict):
+                original = resp.get("result") or resp.get("response") or resp.get("functional_result")
+            new_result = res.get("result") or res.get("response") if isinstance(res, dict) else None
+            def _scalars(d):
+                out = {}
+                if isinstance(d, dict):
+                    for k, v in d.items():
+                        if isinstance(v, (str, int, float, bool)) or v is None:
+                            out[k] = v
+                return out
+            orig_s, new_s = _scalars(original), _scalars(new_result)
+            if original is None or new_result is None:
+                equivalence = {"outcome": "NOT_DETERMINED", "limitacion": "resultado original o nuevo no disponible para comparación estructural"}
+            else:
+                shared = set(orig_s) & set(new_s)
+                mismatches = {k: {"original": orig_s[k], "replay": new_s[k]} for k in shared if orig_s[k] != new_s[k]}
+                if mismatches:
+                    equivalence = {"outcome": "DIVERGENT", "mismatch_fields": sorted(mismatches.keys())[:10]}
+                    result_replay["differences"].append("result_fields_diverged")
+                elif shared:
+                    equivalence = {"outcome": "EQUIVALENT", "compared_fields": sorted(shared)[:10]}
+                else:
+                    equivalence = {"outcome": "PARTIAL", "limitacion": "sin campos escalares comparables entre original y replay"}
+            result_replay["equivalence"] = equivalence
+            result_replay["reproducible"] = (res.get("status") == "ok" and equivalence["outcome"] in ("EQUIVALENT", "PARTIAL"))
         except Exception as exc:
             result_replay["replay_error"] = f"{type(exc).__name__}: {str(exc)[:60]}"
             result_replay["reproducible"] = False
             result_replay["differences"] = ["backend_exception"]
+            result_replay["equivalence"] = {"outcome": "NOT_DETERMINED", "limitacion": "excepción del backend"}
 
         if ev_meta is not None:
             result_replay["evidence_found"] = True
@@ -343,18 +406,18 @@ def replay_operacion(op_id: str) -> dict:
         conn.close()
 
 
-def evaluate_contract(result: dict, evidence_path: str = None) -> dict:
+def evaluate_contract(result: dict, evidence_path: str = None, target_artifact_id: str = None) -> dict:
     """CONTRATO UNIFORME — separa ejecución, evidencia y conclusión.
 
+    target_artifact_id (opcional pero significativo): artefacto solicitado por la
+    operación. Si se suministra, la evidencia DEBE corresponder a él (ligadura de
+    identidad y hash comprobable) — si no, nunca COMPLETE/VALID.
+
     Reglas de promoción (críticas):
-    - Ejecución (BK_OK/INVALID/BLOCKED/UNKNOWN) es ortogonal al estado semántico.
-    - Solo se permite COMPLETE/VALID cuando:
-        * status == "ok" y precheck is True
-        * hay results con primer elemento dinsámico SIN limitations declaradas
-        * la evidencia PASADA (si la hay) supera la puerta de integridad (validate_evidence_path)
-        * la evidencia TE LA WALLE PASADA: no hay evidencia o integridad falsa → NUNCA COMPLETE
-    - En otro caso: PARTIAL (si las limitaciones existen o la integridad falla),
-      BLOCKED o NOT_DETERMINED (sin decisión posible).
+    - COMPLETE/VALID solo si ejecucion.status == "ok" EXACTAMENTE, precheck True,
+      sin limitaciones, y la evidencia supera la puerta de integridad (con ligadura
+      al target cuando se pasa target_artifact_id). Cualquier fallo => PARTIAL.
+    - No hay elemetación intermedia: PARTIAL/BLOCKED/NOT_DETERMINED según el caso.
     """
     status = result.get("status")
     precheck = (result.get("precheck") or {}).get("ok") if isinstance(result.get("precheck"), dict) else None
@@ -368,8 +431,18 @@ def evaluate_contract(result: dict, evidence_path: str = None) -> dict:
             from rxre.core.evidence_integrity import validate_evidence_path
             meta = json.loads(ev_path.read_text())
             target_art = meta.get("artefacto_path", meta.get("artefacto", "")) or None
-            v = validate_evidence_path(str(ev_path), target_art)
+            check_target = target_artifact_id or target_art
+            v = validate_evidence_path(str(ev_path), check_target or None)
             ev_integrity = v["ok"]
+            if target_artifact_id:
+                meta_art = (meta.get("artefacto_path") or meta.get("artefacto") or "") or ""
+                try:
+                    same_file = bool(meta_art) and Path(meta_art).resolve() == Path(target_artifact_id).resolve()
+                except Exception:
+                    same_file = False
+                # Si el artefacto existe en disco y se suministra un target: igualdad estricta obligatoria
+                if meta_art and Path(target_artifact_id).exists() and Path(meta_art).exists() and not same_file:
+                    ev_integrity = False
         except Exception:
             ev_integrity = False
     elif ev_path and not ev_path.exists():
@@ -390,12 +463,16 @@ def evaluate_contract(result: dict, evidence_path: str = None) -> dict:
         epistemic = "NOT_DETERMINED"
         reason = "entrada no válida o no es binario (BK_INVALID / BK_EMPTY)"
 
-    elif status == "blocked" or ejecucion is None or ejecucion == "blocked":
+    elif ejecucion == "error":
+        contract_state = "BLOCKED"
+        epistemic = "NOT_DETERMINED"
+        reason = "la ejecución del backend falló (ejecucion.status=error) — no se acepta la conclusión"
+    elif status == "blocked" or ejecucion is None or ejecucion == "blocked" or (isinstance(ejecucion, str) and ejecucion != "ok"):
         contract_state = "BLOCKED"
         epistemic = "NOT_DETERMINED"
         reason = "ejecución bloqueada por error o falta de permiso (BK_ERROR)"
 
-    elif status == "ok" and precheck is True:
+    elif status == "ok" and precheck is True and ejecucion == "ok":
         if not results:
             # No result item to inspect; we cannot validly claim COMPLETE without evidence/gate.
             if ev_integrity is True:

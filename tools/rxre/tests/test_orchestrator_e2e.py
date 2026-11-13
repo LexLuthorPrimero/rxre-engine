@@ -47,14 +47,13 @@ def test_orquestador_resultado_ajeno():
     # Confirmar que el flujo no asigna automáticamente PROVEN
     assert res.get("verification_status") != "PROVEN", "No debe elevar automáticamente a PROVEN"
 
-def test_orquestador_reutiliza_evidencia_valid():
-    """PROVEN: segunda ejecución con evidencia VALID no repite trabajo innecesario (dry-run confirma)."""
-    orch1 = Orchestrator("op_2939a40bc715d58f")
-    res1 = orch1.run(dry_run=False)
-    orch2 = Orchestrator("op_2939a40bc715d58f")
-    res2 = orch2.run(dry_run=True)
-    assert res2["dry_run"] is True
-    assert res2["conclusion"]["verification_status"] == "RESOLVED"
+def test_orquestador_dry_run_no_afirma_resolver():
+    """ADVERSARIAL: un dry_run NUNCA puede agotar la acción que resuelve el problema."""
+    orch = Orchestrator("op_2939a40bc715d58f")
+    res = orch.run(dry_run=True)
+    assert res["dry_run"] is True
+    assert res["conclusion"]["verification_status"] != "RESOLVED", \
+        "dry_run no ejecuta la acción: no se afirma resolución"
 
 
 if __name__ == "__main__":

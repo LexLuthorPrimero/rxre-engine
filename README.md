@@ -52,7 +52,7 @@ the **i18n black-box**, and **all `wc` corpora** (LC_ALL=C and es_AR.utf8;
 bytes/chars/-L/flags), then runs the engine's Python test suites. Expected
 tail: `total=34145 mismatches=0` twice, `total=3100 mismatches=0`,
 `total=3241 mismatches=0`, `locale invariance OK`, `i18n black-box OK`,
-twelve `total=… mismatches=0` lines for `wc`, `23 passed, 2 skipped` (the 2 skips
+twelve `total=… mismatches=0` lines for `wc`, `44 passed, 2 skipped` (the 2 skips
 are `test_replay_mision` cases whose precondition is the author's private operations
 DB, deliberately not distributed; they run wherever that DB exists), then
 `VERIFY: all steps passed`.
