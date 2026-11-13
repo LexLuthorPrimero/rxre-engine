@@ -5,6 +5,8 @@
 - **Añadido `tools/rxre/semantic/semantic_obligations.py`**: parser SMT-LIB con validación estructural de tres obligaciones BV32 concretas (`x*256 == x<<8`, `x*256 == x*25`, `x*256 == x<<7`). **No** afirma equivalencia general ni promueve binarios a `PROVEN`.
 - **Añadido `tools/rxre/tests/test_semantic_obligations.py`**: identifica las obligaciones esperadas y rechaza fórmulas vacías o de ancho incorrecto. **2 tests** verificados localmente.
 
+- **La puerta pública ahora incluye esos 2 tests**: `verify.sh` (etapa 15) ejecuta `test_semantic_obligations.py` y el pin por defecto sube a **82 passed, 2 skipped**. Es una integración de una suite ya commitada — **no** es un re-sellado de manifiesto (65 artefactos intactos) ni una ampliación de scope ni una nueva milestone de objetivo. Referencias vivas de conteo actualizadas: README, QUICKSTART, reviewer-kit. Terceros: **NOT_EXECUTED**.
+
 ## 2026-11-13 (basename milestone v1.9.0)
 
 - **§1055 R3 — sexto objetivo sellado (basename)**: propiedad acotada “último componente”; corpus 2×1.987/2.013 (seeds 20261114/15), UTF-8 wide chars + boundary buckets; reconstrucción C11 independiente (`basewrap.c`); verify.sh **16 etapas** (basename 14/16), manifiesto ampliado a **65 artefactos**; identidad fail-closed de `/usr/bin/basename` (sha256 `1ef99139…`, coreutils-9.10-5.fc44); `test_discovery_on_basename.py` (2 herméticos; gate **80 passed, 2 skipped**). Alcance honesto: único operando path, sin flags/sufijo; 0 divergencias contra oráculo nativo en hosts del autor. Verificación de terceros: **NOT_EXECUTED**. v1.9.0 etiqueta y publica con autorización explícita del propietario (2026-11-13). Update-25.
