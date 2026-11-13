@@ -30,8 +30,9 @@ verify, falsify, or refute — not to advertise.
   (default L/W/B, flags, `-m` ≡ `-c`, `-L`, byte-audit 256/256) and
   UTF-8 (`-m` multibyte = codepoints, and `-L` with a full width table,
   verified 1:1 against glibc `wcwidth(3)` on all 292,531 assigned
-  codepoints). Third-party verification of any of these remains
-  NOT_EXECUTED.
+  codepoints). An exhaustive flags × multibyte seal (14 flag sets × 18,592
+  cases, 0 divergences) closes that matrix too. Third-party verification
+  of any of these remains NOT_EXECUTED.
 - The Python test suites pass in a fresh clone of this repository (see
   *Verify it yourself* below). Passing tests demonstrate internal
   consistency of the engine; they do **not** validate binary
