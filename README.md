@@ -40,11 +40,12 @@ case file — Spanish).
 sh evidence/r3/verify.sh
 ```
 
-It checks the sealed corpora SHA-256s against their pre-registered seals,
-rebuilds the reconstruction, re-runs the differential comparison on both
-generations (34,145 cases each), then runs the engine's Python test suites.
-Expected tail: `total=34145 mismatches=0` twice, then `12 passed`, then
-`VERIFY: all steps passed`.
+One command; it checks the sealed manifest SHA-256s (32 artifacts),
+rebuilds the reconstruction, re-runs the differential comparison on **both
+generations of `filenvercmp` (34,145 × 2)** and on **all `wc` corpora**
+(LC_ALL=C and es_AR.utf8; bytes/chars/-L/flags), then runs the engine's
+Python test suites. Expected tail: `total=34145 mismatches=0` twice, eleven
+`total=… mismatches=0` lines for `wc`, `12 passed`, then `VERIFY: all steps passed`.
 
 Note: the `rxre-cleanroom` package exists so anyone can check on their own
 machine without this repo's structure: https://github.com/LexLuthorPrimero/rxre-cleanroom (MIT).

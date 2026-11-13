@@ -1,0 +1,49 @@
+# RXRE-R3 sealed manifest — identity + integrity binding
+# Generated 2026-11-13 · MIT · paths relative to evidence/r3/
+# sha256sum -c manifest.txt -> every checked file must match
+#
+# Targets (read-only oracles, binaries never modified):
+#   /usr/bin/ls  sha256 54e936d37decdad9ecaf189b1de347605a0a99037ec87bd17679b6cbde871a0c  BuildID ae6605eeca6cc2f19d18fdd53a521e501df3456d
+#   /usr/bin/wc  sha256 81d614595c717be908fce809713702efd35ce5a56f5ab7cbc497d1a61eb1a38f  BuildID 07a56ef5bcfd9b400c0dc0441530607b3c7d65f8
+# Toolchain on this host: gcc (GCC) 16.2.1 20260819 (Red Hat 16.2.1-2)
+# Build flags used by verify.sh: -std=c11 (wc additionally -Wall -Wextra -Werror -pedantic) -O2
+# Distinct artifact identities (hashes below over file contents only):
+#   filenvercmp reconstruction c721c5c6672f5fbbd5896a922efc7a58a71b37b9bd616f46fbefde3bcdfc943d
+#   wc reconstruction (wc_recon_m10) 36ecfd7ec21da07f11883e8d2a94747b24e60ecb1e4ba636405ebc30a668d479
+#   harness verify2        904cfdac4538f9e80ef5ea4c119b2809b295a728ff88e99815d33182013cfbfb
+#   width table (generated) 7f96aa2b61fa86697d5ade0eae87888773b07dacab9598f9382db2f6b55125d0
+# Seals & milestones: 2 generations filenvercmp (35 files), wc 11 corpora
+# Deliberately excluded: matrix_native_m.txt (zero bytes; abandoned early -m attempt kept for history; hito 7 uses wc -m==-c in C)
+# Verification order causal chain: seal corpora -> oracle nativo -> reconstruction -> differential -> suite
+c721c5c6672f5fbbd5896a922efc7a58a71b37b9bd616f46fbefde3bcdfc943d  reconstruction/filenvercmp.c
+904cfdac4538f9e80ef5ea4c119b2809b295a728ff88e99815d33182013cfbfb  verify2.c
+bfa30fb358795a7052aaff0cd0b833ccd7f77bb16658fd1aaccce48c361874d7  oracle/cases_seed20261112.txt
+8333b744b3dc1985648bd54ee432c74770bb78cba18e359ee4779d0acf885873  oracle/cases_seed20261113.txt
+ed5e91ef5b810a2dbf21186bfd7742fb1ffa90f55cc088329d045bc9926ec0bd  oracle/matrix_native.txt
+e031d3ed6d4c6329cf7edcae55b795fbe0d3c0b121fed34839ec8563b60cf6fd  oracle/matrix_native_20261113.txt
+36ecfd7ec21da07f11883e8d2a94747b24e60ecb1e4ba636405ebc30a668d479  wc/wc_recon_m10.c
+7f96aa2b61fa86697d5ade0eae87888773b07dacab9598f9382db2f6b55125d0  wc/wc_width_table_gen.h
+89bc256be4c4879b664f76fe5c33082132cbc1e5a52ade108fa5f3c0ca1a564a  wc/verify_wc.c
+20e7759c8732f7cd88e26a04ea57d7532382156c6ca022ee9b95c1870bb3247d  wc/verify_m.c
+429534d6fb592affd4b46dee188cf0282c4b3933737797efa3f72a86f2e226de  wc/verify_L.c
+a4f28c1cf9dea233f6fdd597e570aff453313849817328335d6fc14b2469b2cc  wc/verify_flags_u8.c
+4a2b85bbd12efc6507f6732fd85432be48d2d7805b96dcd902fb8a591de860cc  wc/cases_seed20261114.txt
+20842467ac4fa8645e7b844177b84a4e7edf37f0bbbaea4b502604683a0112bb  wc/matrix_native_wc.txt
+bb21a816da51deb656f93290850c7334f32caba9302ad2599578d9a896390067  wc/cases_seed20261115.txt
+72cfcecd2b1506c51d6c7a5050c4cfb8f604a2879ee33128830d104ac8eb4d47  wc/matrix_native_wc_20261115.txt
+32414b9810f2a566e77ae04e5703b451595516dbe588ece46ee4800768e303b4  wc/cases_wcflags_seed20261116.txt
+adc83227df98ccb304d1574252778628be5e0d776d91b00cf51422ead99f1df0  wc/matrix_native_wcflags.txt
+16faf89c1d559117689887ef2ea6a100f120df69c3a64f819e3f2a871421c330  wc/cases_wcL_seed20261117.txt
+de2fc092adf8ca47aa0c915bc86c2a7e086d4cf3cbecb82ca76b3e8bb865b6df  wc/matrix_native_wcL.txt
+91e6dbbf81803941709ac0c0903ed6254522d3b33465450705cf25c1e1037b83  wc/cases_high_seed20261118.txt
+e7fc6be66224edec3e8d00752f150f5b37803679244f174b02147546fcb29c0c  wc/matrix_high_LC_ALL=C.txt
+608c409081baff96256f6caf142158ed8ba29470ce2612f322c203aa08cab1e9  wc/matrix_high_esAR.txt
+4aa434677a0e40c14e80d246e8fd909c5d59cdb3d17797cbf3967f0bd51267c8  wc/cases_highutf8_seed20261120.txt
+c837c82199612641cb6b661b19a4c1a6d18ee8e32ce03bc50956461aab3f3893  wc/matrix_highutf8_C.txt
+0018862154d5400f43b5c718b7127bed689886982997325b96651e4e039efd13  wc/matrix_highutf8.txt
+2a2fae5213ec9f531a4a0b47cb8bc7be107bc48e2f511852ab89b57af4c80585  wc/cases_m_utf8_seed20261121.txt
+8e85e0f525b13acb962f80e198387f32df001dd95f0b7c28e890b7b96e2bd881  wc/matrix_native_m_utf8.txt
+44f292c1af43f77cfc06c59ae076aabdc3eeb67284d96ad7cf50502c361c92b0  wc/cases_L_utf8_seed20261123.txt
+545c469fbed14f3d6622366ac1b713e5186d08627dc9e11be9897e0e6f32d29f  wc/matrix_native_L_utf8.txt
+717edeb65a41557d6701dbd10bd52dc86e238dddb9ab9edb2f1d2be9a227c604  wc/cases_flags_utf8_seed20261125.txt
+29cfa79734977bbcb34e3232972bcc6064e32034cc3a1a47e5c15f9b0c37b21a  wc/matrix_flags_utf8.txt
