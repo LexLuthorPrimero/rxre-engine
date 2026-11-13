@@ -56,9 +56,17 @@ def test_5_archivo_otro_artefacto():
 def test_5b_evidencia_target_coinciden_aceptada():
     repo_root = Path(__file__).resolve().parents[3]
     # Evidencia (/bin/ls) vinculada al artefacto solicitado (/bin/ls == /usr/bin/ls): pasa la puerta y acepta
-    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared"}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared","observation":{"target":"/bin/ls","functions":37}}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
     assert res["contract_state"] == "COMPLETE", f"evidencia vinculada e íntegra debe aceptar: {res}"
     assert res["epistemic"] == "VALID"
+
+def test_5c_resultado_declarado_sin_observacion_no_acepta():
+    repo_root = Path(__file__).resolve().parents[3]
+    # BK_OK + precheck ok + sin limitaciones + evidencia íntegra y vinculada,
+    # PERO resultado meramente declarado (sin observación semántica verificable)
+    res = evaluate_contract({"status":"ok","precheck":{"ok":True},"ejecucion":{"status":"ok"},"results":[{"status":"declared"}]}, str(repo_root / "audit" / "evidence" / "e2e_007.json"), target_artifact_id="/bin/ls")
+    assert res["contract_state"] != "COMPLETE", f"declarado sin observación JAMÁS acepta: {res}"
+    assert res["epistemic"] != "VALID"
 
 def test_6_evidencia_correcta_aceptada():
     repo_root = Path(__file__).resolve().parents[3]

@@ -1,7 +1,8 @@
-"""RXRE-MISSION-257 — Reconstrucción semántica ejecutable.
+"""RXRE-MISSION-257 — Reconstrucción semántica estructural de ELF reales.
 
-Orquesta rz_functions, rz_cfg, rz_xrefs y rz_dataflow para producir
-un expediente de reconstrucción semántica de un binario ELF real.
+Orquesta rz_functions, rz_cfg y rz_xrefs (únicos proveedores integrados hoy; NO incluye
+rz_dataflow). Produce un expediente ESTRUCTURAL e HIPOTÉTICO; las candidatas nacen con
+semántica NOT_DETERMINED — no demuestra comprensión por sí sola.
 
 No modifica contratos protegidos. No crea rutas paralelas de ejecución.
 """
@@ -56,6 +57,15 @@ def _classify_function(name: str, size: int, nbbs: int,
             "size=%d nbbs=%d cfg_status=%s (body with structural evidence)" % (size, nbbs, cfg_status))
 
 
+def _rizin_cfg(offset: int, binary_path: str, budget_seconds: int):
+    """CFG provider (único implementado: rizin). Interfaz reservada para otros proveedores que
+    informen versión/procedencia/limitaciones. No sustituye la admisión ni el dictamen semántico."""
+    return subprocess.run(
+        ["/usr/bin/rizin", "-q", "-N", "-e", "scr.color=0",
+         "-c", "aaa; agf json @ %d" % offset, binary_path],
+        capture_output=True, text=True, timeout=budget_seconds,
+    )
+
 def reconstruct(binary_path: str, backend_id: str = "rizin",
                timeout: int = 300) -> Dict[str, Any]:
     """Reconstruye semánticamente un binario ELF real.
@@ -72,6 +82,12 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     """
     if not os.path.isfile(binary_path):
         return {"status": "INVALID", "error": "archivo no existe: %s" % binary_path}
+
+    _deadline = time.time() + max(1, int(timeout))
+    def _remaining():
+        return max(0.0, _deadline - time.time())
+    def _budget_left():
+        return _remaining() > 0.5
 
     artifact_hash = _sha256_file(binary_path)
     start = time.time()
@@ -120,19 +136,27 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     bb_total = 0
     edges_total = 0
 
+    cfg_skipped_no_offset = 0
+    cfg_skipped_budget = 0
+    discovered = len(funcs)
+    eligible = 0
     for fn in funcs:
         if not isinstance(fn, dict):
+            cfg_skipped_no_offset += 1
             continue
         offset = fn.get("offset", 0)
         if not offset:
+            cfg_skipped_no_offset += 1
+            continue
+        eligible += 1
+        if not _budget_left():
+            cfg_skipped_budget += 1
+            cfg_funcs[offset] = {"status": "BUDGET_EXHAUSTED", "n_blocks": 0}
             continue
         cfg_attempted += 1
         try:
-            p = subprocess.run(
-                ["/usr/bin/rizin", "-q", "-N", "-e", "scr.color=0",
-                 "-c", "aaa; agf json @ %d" % offset, binary_path],
-                capture_output=True, text=True, timeout=30
-            )
+            _t = min(30, max(1, int(_remaining())))
+            p = _rizin_cfg(offset, binary_path, _t)
             # Find JSON in output
             stdout = p.stdout.strip()
             # Remove ANSI
@@ -174,8 +198,15 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     cfg_data = {
         "n_funciones": len(cfg_funcs),
         "n_bloques": bb_total,
+        "functions_discovered": discovered,
+        "functions_eligible": eligible,
+        "functions_attempted": cfg_attempted,
         "functions_with_cfg": cfg_successful,
-        "cfg_coverage": round(cfg_successful / max(len(funcs), 1) * 100, 1),
+        "functions_failed": cfg_failed,
+        "functions_skipped_no_offset": cfg_skipped_no_offset,
+        "functions_skipped_budget": cfg_skipped_budget,
+        "cfg_coverage": round(cfg_successful / max(cfg_attempted, 1) * 100, 1),
+        "cfg_coverage_of_eligible": round(cfg_successful / max(eligible, 1) * 100, 1),
         "per_function": {str(k): v for k, v in list(cfg_funcs.items())[:10]},
     }
 
@@ -341,11 +372,13 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     _unresolved_srcs = sorted({e["source_function_offset"] for e in callgraph_edges
                                if e.get("resolution_status") == "UNRESOLVED"})
     for _soff in _unresolved_srcs:
+        if not _budget_left():
+            break
         try:
             _p = subprocess.run(
                 ["/usr/bin/rizin", "-q", "-N", "-e", "scr.color=0",
                  "-c", "aaa; pdfj @ %d" % _soff, binary_path],
-                capture_output=True, text=True, timeout=60)
+                capture_output=True, text=True, timeout=min(60, max(1, int(_remaining()))))
             _s = re.sub(r"\x1b\[[0-9;?]*[ -/]*[@-~]", "", _p.stdout or "")
             _i = _s.find("{")
             if _i < 0:
@@ -420,7 +453,7 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     _got_sym_probe = {}
     try:
         _rg = subprocess.run(["readelf", "-r", binary_path],
-                             capture_output=True, text=True, timeout=30)
+                             capture_output=True, text=True, timeout=min(30, max(1, int(_remaining()))))
         for _ln in (_rg.stdout or "").splitlines():
             _parts = _ln.split()
             if len(_parts) >= 5 and _parts[0].startswith("00"):
@@ -439,12 +472,14 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
     _m261_modes = _Counter()
     _m261_epi = _Counter()
     for _fn in funcs_sorted:
+        if not _budget_left():
+            break
         _soff = int(_fn.get("offset", 0) or 0)
         try:
             _p = subprocess.run(
                 ["/usr/bin/rizin", "-q", "-N", "-e", "scr.color=0",
                  "-c", "aaa; pdfj @ %d" % _soff, binary_path],
-                capture_output=True, text=True, timeout=60)
+                capture_output=True, text=True, timeout=min(60, max(1, int(_remaining()))))
             _s = re.sub(r"\x1b\[[0-9;?]*[ -/]*[@-~]", "", _p.stdout or "")
             _i = _s.find("{")
             if _i < 0:
@@ -850,12 +885,15 @@ def reconstruct(binary_path: str, backend_id: str = "rizin",
             "functions_cfg_failed": cfg_failed,
             "basic_blocks_total": bb_total,
             "cfg_edges_total": edges_total,
-            "cfg_coverage_ratio": round(cfg_successful / max(len(funcs), 1), 4),
+            "cfg_coverage_ratio": round(cfg_successful / max(cfg_attempted, 1), 4),
         },
         "dictamen": {
             "functions_discovered": len(funcs),
+            "functions_eligible": eligible,
+            "functions_attempted": cfg_attempted,
             "functions_with_cfg": cfg_successful,
-            "cfg_coverage_ratio": round(cfg_successful / max(len(funcs), 1), 4),
+            "functions_failed": cfg_failed,
+            "cfg_coverage_ratio": round(cfg_successful / max(cfg_attempted, 1), 4),
             "call_edges": len(call_edges),
             "semantic_status": "PARTIAL" if funcs else "NOT_DETERMINED",
         },

@@ -119,3 +119,44 @@ def test_db_missing(monkeypatch, tmp_path):
     monkeypatch.setattr(replay_mod, "DB_PATH", Path(tmp_path) / "no-hay-db.sqlite3")
     res = replay_mod.replay_operacion("op_x")
     assert res["status"] == "no_db"
+
+
+def test_verify_reinvestigation_requires_explicit_condition(monkeypatch, tmp_path):
+    """ADVERSARIAL: clasificación declarada por el resultado NO basta para RESOLVED."""
+    import rxre.core.replay as replay_mod2
+    art, sha = _artifact(tmp_path)
+    ev = Path(tmp_path) / "ev.json"
+    ev.write_text(json.dumps({"e2e_id": "e2e_901", "artefacto_path": str(art),
+                              "artefacto_size_bytes": art.stat().st_size,
+                              "artefacto_hash_sha256": sha,
+                              "epistemic": "VALID", "procedencia": "matrix"}))
+    plan = {"op_id": "op_m1", "evidence_path": str(ev),
+            "plan": [{"action": "conservar", "condition": "hash estable"}]}
+    # Resultado con classification VALID pero SIN condition_satisfied -> UNRESOLVED
+    res = replay_mod2.verify_reinvestigation(plan, {"op_id": "op_m1", "classification": "VALID", "evidence_path": str(ev)})
+    assert res["verification_status"] == "UNRESOLVED"
+    # Con condition_satisfied pero SIN dependencias verificadas -> UNRESOLVED
+    res = replay_mod2.verify_reinvestigation(plan, {"op_id": "op_m1", "classification": "VALID",
+                                                    "condition_satisfied": True,
+                                                    "evidence_path": str(ev)})
+    assert res["verification_status"] == "UNRESOLVED"
+    # Condición + dependencias verificadas + evidencia íntegra vinculada -> RESOLVED
+    res = replay_mod2.verify_reinvestigation(plan, {"op_id": "op_m1", "classification": "VALID",
+                                                    "condition_satisfied": True,
+                                                    "dependencias_verificadas": True,
+                                                    "artefacto_reconstruido": str(art),
+                                                    "evidence_path": str(ev)})
+    assert res["verification_status"] == "RESOLVED"
+
+def test_partial_never_reproducible(monkeypatch, tmp_path):
+    """ADVERSARIAL: PARTIAL en el objeto equivalence NUNCA produce reproducible=True."""
+    art, sha = _setup(monkeypatch, tmp_path, [])
+    db = _make_db(tmp_path, [("op_p", "binary.inspect",
+                              {"target": str(art)},
+                              {"artefacto_hash_sha256": sha, "backend": {"tool_version": "fake"},
+                               "result": {"functions": 42, "sections": 7, "extra_orig": "only-original"}})])
+    monkeypatch.setattr(replay_mod, "DB_PATH", db)
+    # El fake devuelve exactamente {42,7} sin extra_orig -> PARTAL: campos faltantes
+    res = replay_mod.replay_operacion("op_p")
+    assert res["replay_result"]["equivalence"]["outcome"] == "PARTIAL"
+    assert res["reproducible"] is False

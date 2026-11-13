@@ -213,9 +213,10 @@ def verify_reinvestigation(plan: dict, result: dict) -> dict:
     action = verification["plan_action"]
     res_class = result.get("classification") or result.get("reproducible") or ""
     deps_verified = bool(result.get("dependencias_verificadas") is True)
-    condition_ok = bool(result.get("condition_satisfied") is True) or (isinstance(res_class, str) and res_class in ("VALID", "RESOLVED")) or (res_class is True)
+    # La clasificación declarada por el resultado NUNCA basta: la condición del plan la evalúa el verificador.
+    condition_ok = bool(result.get("condition_satisfied") is True)
     verification["dependencias_verificadas"] = deps_verified
-    if action in ("conservar", "reevaluar") and condition_ok and (deps_verified or res_class is True or (isinstance(res_class, str) and res_class in ("VALID", "RESOLVED"))):
+    if action in ("conservar", "reevaluar") and condition_ok and deps_verified:
         verification["verification_status"] = "RESOLVED"
         verification["motivo"] = "condición del plan satisfecha con evidencia vinculada e íntegra"
         verification["reducida_incertidumbre"] = True
@@ -354,28 +355,46 @@ def replay_operacion(op_id: str) -> dict:
             if isinstance(resp, dict):
                 original = resp.get("result") or resp.get("response") or resp.get("functional_result")
             new_result = res.get("result") or res.get("response") if isinstance(res, dict) else None
-            def _scalars(d):
+            def _norm(x):
+                if isinstance(x, dict):
+                    return {str(k): _norm(v) for k, v in sorted(x.items(), key=lambda kv: str(kv[0]))}
+                if isinstance(x, (list, tuple)):
+                    return [_norm(v) for v in x]
+                return x
+            def _flatten(x, prefix=""):
                 out = {}
-                if isinstance(d, dict):
-                    for k, v in d.items():
-                        if isinstance(v, (str, int, float, bool)) or v is None:
-                            out[k] = v
+                if isinstance(x, dict):
+                    for k, v in x.items():
+                        out.update(_flatten(v, f"{prefix}.{k}" if prefix else str(k)))
+                elif isinstance(x, list):
+                    for i, v in enumerate(x):
+                        out.update(_flatten(v, f"{prefix}[{i}]"))
+                else:
+                    out[prefix or "."] = x
                 return out
-            orig_s, new_s = _scalars(original), _scalars(new_result)
+            orig_n, new_n = _norm(original), _norm(new_result)
             if original is None or new_result is None:
                 equivalence = {"outcome": "NOT_DETERMINED", "limitacion": "resultado original o nuevo no disponible para comparación estructural"}
             else:
-                shared = set(orig_s) & set(new_s)
-                mismatches = {k: {"original": orig_s[k], "replay": new_s[k]} for k in shared if orig_s[k] != new_s[k]}
+                o_flat, n_flat = _flatten(orig_n), _flatten(new_n)
+                shared = set(o_flat) & set(n_flat)
+                mismatches = {k: {"original": o_flat[k], "replay": n_flat[k]} for k in shared if o_flat[k] != n_flat[k]}
+                only_orig = sorted(set(o_flat) - set(n_flat))[:10]
+                only_new = sorted(set(n_flat) - set(o_flat))[:10]
                 if mismatches:
                     equivalence = {"outcome": "DIVERGENT", "mismatch_fields": sorted(mismatches.keys())[:10]}
                     result_replay["differences"].append("result_fields_diverged")
-                elif shared:
-                    equivalence = {"outcome": "EQUIVALENT", "compared_fields": sorted(shared)[:10]}
+                    if only_orig or only_new:
+                        equivalence["only_in_original"] = only_orig
+                        equivalence["only_in_replay"] = only_new
+                elif o_flat and o_flat == n_flat:
+                    equivalence = {"outcome": "EQUIVALENT", "compared_fields": sorted(o_flat)[:10]}
                 else:
-                    equivalence = {"outcome": "PARTIAL", "limitacion": "sin campos escalares comparables entre original y replay"}
+                    equivalence = {"outcome": "PARTIAL", "limitacion": "el replay no recubre el resultado completo (campos ausentes o inesperados)",
+                                   "only_in_original": only_orig, "only_in_replay": only_new}
+                    result_replay["differences"].append("result_coverage_incomplete")
             result_replay["equivalence"] = equivalence
-            result_replay["reproducible"] = (res.get("status") == "ok" and equivalence["outcome"] in ("EQUIVALENT", "PARTIAL"))
+            result_replay["reproducible"] = (res.get("status") == "ok" and equivalence["outcome"] == "EQUIVALENT")
         except Exception as exc:
             result_replay["replay_error"] = f"{type(exc).__name__}: {str(exc)[:60]}"
             result_replay["reproducible"] = False
@@ -448,11 +467,20 @@ def evaluate_contract(result: dict, evidence_path: str = None, target_artifact_i
     elif ev_path and not ev_path.exists():
         ev_integrity = False
 
-    has_limits = bool(
-        results
-        and isinstance(results[0], dict)
-        and (results[0].get("limitations") or results[0].get("limitaciones"))
-    )
+    first = results[0] if results and isinstance(results[0], dict) else {}
+    has_limits = bool(first.get("limitations") or first.get("limitaciones"))
+
+    def _semantic_carrier(d):
+        """Observación semántica verificable: nada de 'declared' vacío."""
+        for key in ("observation", "observaciones", "findings", "hallazgos", "analysis", "datos"):
+            v = d.get(key)
+            if isinstance(v, (str, int, float, bool)) and str(v).strip():
+                return True
+            if isinstance(v, (dict, list, tuple)) and len(v) > 0:
+                return True
+        return False
+
+    has_semantic = _semantic_carrier(first)
 
     contract_state = "UNKNOWN"
     epistemic = "NOT_DETERMINED"
@@ -487,6 +515,10 @@ def evaluate_contract(result: dict, evidence_path: str = None, target_artifact_i
             contract_state = "PARTIAL"
             epistemic = "PARTIAL"
             reason = "ejecución completada pero con datos parciales / declaración de límite (BK_OK + limitaciones)"
+        elif not has_semantic:
+            contract_state = "PARTIAL"
+            epistemic = "PARTIAL"
+            reason = "BK_OK sin limitaciones, evidencia íntegra, PERO resultados sin observación semántica verificable (p. ej. status='declared' solo) — no se permite COMPLETE/VALID"
         elif ev_integrity is False:
             contract_state = "PARTIAL"
             epistemic = "PARTIAL"

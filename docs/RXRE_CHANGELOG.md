@@ -2,7 +2,7 @@
 
 ## 2026-11-12
 
-- **§1044 R3** — cadena E2E de `filevercmp` sobre `/usr/bin/ls`: `OPEN — NOT_PASS` (791/34.145).
+- **§1044 R3** — cadena E2E de `filevercmp` sobre `/usr/bin/ls`: `OPEN — NOT_PASS` (791/34.145) — **[HITÓRICO / SUPERSEDED 2026-11-12, update-5]**: las 791 divergencias fueron resueltas; estado vigente en `evidence/r3/EXPEDIENTE_R3.md` (§11 + updates 6–10). No leer como estado actual.
 - **§1045** — identidad oficial publicada: método primario; modelo falsable; `RXRE_IDENTIDAD.md`.
 - **Añadidos** (esta sesión):
   - `RXRE_ESENCIA.md`, `RXRE_ESTADO.md`, `RXRE_INDICE.md`, `RXRE_FLUJO.md`,

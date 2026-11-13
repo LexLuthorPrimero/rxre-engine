@@ -83,6 +83,15 @@ PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_m263_profile_binding.py" -q)
 printf '%s\n' "$PYTEST_OUT"
 PYTEST_COUNT=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ passed' | awk '{print $1}')
+EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-52}"
+EXPECT_SKIPPED="${RXRE_ENGINE_EXPECT_SKIPPED:-2}"
+ACTUAL_SKIPPED=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ skipped' | awk '{print $1}')
+ACTUAL_SKIPPED=${ACTUAL_SKIPPED:-0}
+if [ "$PYTEST_COUNT" != "$EXPECT_PASSED" ] || [ "$ACTUAL_SKIPPED" != "$EXPECT_SKIPPED" ]; then
+  echo "FAIL: pytest report desync — expected ${EXPECT_PASSED} passed/${EXPECT_SKIPPED} skipped, got ${PYTEST_COUNT:-none} passed/${ACTUAL_SKIPPED} skipped." >&2
+  echo "(author host with private DB may set RXRE_ENGINE_EXPECT_PASSED/RXRE_ENGINE_EXPECT_SKIPPED explicitly)" >&2
+  exit 5
+fi
 
 echo "== 12/12 coverage summary =="
 echo "filenvercmp: 4 sealed runs (2 generations + challenge corpus + locale invariance + i18n black-box) — all byte-exact"
