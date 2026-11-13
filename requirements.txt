@@ -1,0 +1,4 @@
+# Engine test suite dependencies (the seven canonical suites).
+# No heavy runtime deps; adapters to external engines (Ghidra, Rizin, …)
+# are optional and fail closed when unavailable.
+pytest>=8,<10
