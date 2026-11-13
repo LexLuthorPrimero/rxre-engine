@@ -1,5 +1,9 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-13 (fold milestone)
+
+- **§1046 R3 — tercer objetivo sellado (fold)**: property reconstruction de `/usr/bin/fold -w 4` (cell width, tab stop 8) sellada con 2 generaciones de corpus (2.554 casos c/u; total=2554 ×2, 0 divergencias) y verify.sh con nueva etapa 11/13 (identidad fail-closed de /usr/bin/fold, sha256 95030461…). Manifiesto sellado ahora vincula 47 artefactos. Update-15 en EXPEDIENTE_R3.md. Verificación de terceros: NOT_EXECUTED.
+
 ## 2026-11-12
 
 - **§1044 R3** — cadena E2E de `filevercmp` sobre `/usr/bin/ls`: `OPEN — NOT_PASS` (791/34.145) — **[HITÓRICO / SUPERSEDED 2026-11-12, update-5]**: las 791 divergencias fueron resueltas; estado vigente en `evidence/r3/EXPEDIENTE_R3.md` (§11 + updates 6–10). No leer como estado actual.
