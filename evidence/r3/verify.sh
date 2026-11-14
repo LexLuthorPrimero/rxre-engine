@@ -63,7 +63,7 @@ cmp oracle/matrix_native_20261113.txt hito14_locale/matrix_native_es_AR_utf8_202
 echo "locale invariance OK (gen1, gen2 byte-equal)"
 
 echo "== 7/16 filenvercmp i18n black-box (200 UTF-8 names vs native ls -v) =="
-gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -I reconstructed/ -o "$TMP/sort_names" filenvercmp_i18n_20261126/sort_names.c reconstruction/filenvercmp.c
+gcc -std=c11 -Wall -Wextra -Werror -pedantic -O2 -o "$TMP/sort_names" filenvercmp_i18n_20261126/sort_names.c reconstruction/filenvercmp.c
 "$TMP/sort_names" filenvercmp_i18n_20261126/names_i18n.txt > "$TMP/i18n.out"
 cmp "$TMP/i18n.out" filenvercmp_i18n_20261126/oracle_lsAv_i18n.txt
 cmp "$TMP/i18n.out" filenvercmp_i18n_20261126/reconstructed_sorted_i18n.txt
