@@ -11,7 +11,10 @@ touches the network.
 
 Semantics
 ---------
-- Fenced code blocks and inline code spans are excluded from scanning.
+- Fenced code blocks, indented code (>=4 spaces or a tab) and inline code spans are
+  excluded from scanning. Documented approximation: a link nested inside a 4-space-indented
+  list item is not scanned (it reads as code); links inside fenced blocks are skipped in both
+  link and anchor collection.
 - Scheme-qualified links (https://, mailto:) and reference-style links
   (`[text][ref]`) are skipped and counted separately, not validated.
 - Root-absolute targets starting with `/` are skipped (cannot be grounded
@@ -90,6 +93,10 @@ def slugify(heading: str) -> str:
     return "".join(out)
 
 
+def is_indented_code(raw: str) -> bool:
+    return raw.startswith("\t") or raw.startswith("    ")
+
+
 def strip_code(text: str) -> str:
     lines: list[str] = []
     in_fence = False
@@ -99,6 +106,8 @@ def strip_code(text: str) -> str:
             lines.append("")
             continue
         if in_fence:
+            lines.append("")
+        elif is_indented_code(raw):
             lines.append("")
         else:
             lines.append(re.sub(r"`[^`\n]*`", "", raw))
@@ -113,6 +122,8 @@ def anchors_of(text: str) -> set[str]:
             in_fence = not in_fence
             continue
         if in_fence:
+            continue
+        if is_indented_code(raw):
             continue
         match = HEADING_RE.match(raw)
         if match:

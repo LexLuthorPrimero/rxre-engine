@@ -72,6 +72,21 @@ def test_links_inside_code_are_ignored(tmp_path: Path) -> None:
     assert run(root).returncode == 0, run(root).stdout
 
 
+def test_links_inside_indented_code_are_ignored(tmp_path: Path) -> None:
+    root = fixture(tmp_path, {"a.md": "prose\n\n    [x](missing.md)\n\ntext\n"})
+    assert run(root).returncode == 0, run(root).stdout
+
+
+def test_headings_inside_indented_code_do_not_anchor(tmp_path: Path) -> None:
+    root = fixture(
+        tmp_path,
+        {"a.md": "    ## Fake\n\nsee [x](a.md#fake)\n"},
+    )
+    proc = run(root)
+    assert proc.returncode == 1
+    assert "no such anchor #fake" in proc.stdout
+
+
 def test_scheme_links_are_skipped(tmp_path: Path) -> None:
     root = fixture(
         tmp_path,

@@ -144,7 +144,7 @@ PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_check_release_features.py" -q)
 printf '%s\n' "$PYTEST_OUT"
 PYTEST_COUNT=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ passed' | awk '{print $1}')
-EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-129}"
+EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-131}"
 EXPECT_SKIPPED="${RXRE_ENGINE_EXPECT_SKIPPED:-2}"
 ACTUAL_SKIPPED=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ skipped' | awk '{print $1}')
 ACTUAL_SKIPPED=${ACTUAL_SKIPPED:-0}

@@ -1,5 +1,11 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-14 (indented-code false-positive fix — dogfood sobre rizin)
+
+- **Corregido `tools/rxre/parity/check_md_links.py`**: además de fences y spans inline, ahora **las líneas con indentación de ≥4 espacios o tab se tratan como code block** (CommonMark-estilo) y se excluyen del análisis de enlaces y de la recolección de anchors. Antes: `doc/esil.md:11` de rizin acusaba un link `[word](esil)` dentro de pseudo-código indentado — falso positivo de maestro. Limitación documentada en el docstring: un link anidado en un list item indentado 4+ espacios no se escanea.
+- **Añadido `tools/rxre/tests/test_check_md_links.py`**: 2 herméticos (links en indentación excluidos; headings en indentación no crean anchor).
+- **La puerta pública ahora incluye esos 2 tests**: `verify.sh` (etapa 15) ejecuta `test_check_md_links.py` y el pin por defecto sube a **131 passed, 2 skipped**. Dogfood sobre el árbol de `rizinorg/rizin` (dev, árbol completo): los 32 hallazgos se mantienen, **todos** en subprojects vendored (zstd/capstone/pcre2) o refs a HTML doxygen generado (`DEVELOPERS.md`), ninguno en docs propias de rizin; el falso positivo de indentación desaparece. **No** es re-sellado — 65 artefactos intactos; **sin** tag ni release. Terceros: **NOT_EXECUTED**.
+
 ## 2026-11-14 (packaged-feature release verification tooling)
 
 - **Añadido `tools/rxre/parity/check_release_features.py`**: verificador reutilizable (stdlib-only, sin red) de afirmaciones documentadas/committeadas sobre features en el artefacto empaquetado: greps (`--marker PATTERN`, regex de bytes, repetidas) sobre el árbol del paquete; cada marker debe aparecer en ≥1 archivo; fail-closed. VCS/dependency-cache dirs (`.git`, `node_modules`…) excluidas; symlinks no seguidas; archivos >8 MiB skipped y contabilizados. Nace de REA #7680 (release notes 6.8.0 prometían MMIO attribution que `959ab0c10` removió antes del release). Dogfood: árbol de `morluto/rea` — `REA_MCP_TOOL_FAMILIES` presente (87 archivos en `dist/`); marker inexistente reporta MISSING rc=1; el status honesto: solo valida que los markers declarados por el caller estén — no afirma exhaustividad ni paridad docs↔artifact.
