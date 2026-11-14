@@ -140,10 +140,11 @@ PYTEST_OUT=$(python3 -m pytest \
   "$ROOT/tools/rxre/tests/test_rea_verify_zip_bounded_views.py" \
   "$ROOT/tools/rxre/tests/test_check_install_pins.py" \
   "$ROOT/tools/rxre/tests/test_pty_sighup_probe.py" \
-  "$ROOT/tools/rxre/tests/test_check_md_links.py" -q)
+  "$ROOT/tools/rxre/tests/test_check_md_links.py" \
+  "$ROOT/tools/rxre/tests/test_check_release_features.py" -q)
 printf '%s\n' "$PYTEST_OUT"
 PYTEST_COUNT=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ passed' | awk '{print $1}')
-EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-120}"
+EXPECT_PASSED="${RXRE_ENGINE_EXPECT_PASSED:-129}"
 EXPECT_SKIPPED="${RXRE_ENGINE_EXPECT_SKIPPED:-2}"
 ACTUAL_SKIPPED=$(printf '%s\n' "$PYTEST_OUT" | tail -1 | grep -oE '[0-9]+ skipped' | awk '{print $1}')
 ACTUAL_SKIPPED=${ACTUAL_SKIPPED:-0}

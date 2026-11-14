@@ -44,7 +44,7 @@ sh evidence/r3/verify.sh
 diferencial de `filenvercmp` (dos generaciones 34.145×2, challenge corpus
 3.100 + 3.241, invariancia de locale, i18n black-box), (8–10) los 11 corpora de
 `wc` en `LC_ALL=C` y `es_AR.utf8`, (11) fold (6 regeneraciones), (12) tr,
-(13) dirname, (14) basename, (15) suite pytest (120 passed, 2 skipped en clon
+(13) dirname, (14) basename, (15) suite pytest (129 passed, 2 skipped en clon
 público), (16) resumen. Cola esperada: `VERIFY: all steps passed`.
 
 ## 3. Qué comprobar tú mismo (no te lo crea nadie, ni el autor)
