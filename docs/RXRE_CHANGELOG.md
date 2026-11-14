@@ -1,5 +1,11 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-14 (install-pin verification tooling)
+
+- **Añadido `tools/rxre/parity/check_install_pins.py`**: verificador reutilizable de documentación-vs-realidad, nacido del issue REA #3423. Falla cerrado cuando (a) ejemplos de invocación en docs/README/HTML/scripts no fijan versión (`npx rea-agents` desnudo, `@latest`, dist-tags `next/beta/canary/rc`), (b) un pin semver se desalinea contra `package.json` (`@6.8.0` vs `6.9.0`), o (c) la URL del instalador paste-and-curl apunta a un ref móvil (`main`, `HEAD`) en vez del tag de release (`<pkg>-<version>`). No accede a la red; lee solo el repositorio. Exclusiones por defecto: CHANGELOG y corpus histórico de errores; `install-pin: allow` en la línea o vecina suprime una línea justificada; `<placeholder>` y `${var}` del shell no se evalúan. Reporte JSON (`--json`) con reglas `unpinned-invocation` / `stale-pin` / `unstable-installer-ref`. **No** es una auditoría de prosa, no verifica que el pin exista en el registro, y no promueve ningún artefacto a `PROVEN`.
+- **Añadido `tools/rxre/tests/test_check_install_pins.py`**: 11 tests herméticos (repo limpio pasa, invocación desnuda falla, `@latest` falla, pin stale falla, ref móvil falla, CHANGELOG ignorado, `npx.cmd`/`bunx`/`npx.cmd` verificados, reporte JSON válido, dist-tags rechazados).
+- **La puerta pública ahora incluye esos 11 tests**: `verify.sh` (etapa 15) ejecuta `test_check_install_pins.py` y el pin por defecto sube a **105 passed, 2 skipped**. Integración de una suite ya commitada — **no** es re-sellado (manifiesto intacto, 65 artefactos), no es ampliación de scope ni nuevo objetivo sellado. Uso dogfood: corre sobre el árbol de `morluto/rea` con **0 hallazgos** tras fijar los ejemplos de instalación (#10463); detectó los residuos que la pasada manual pasó por alto (instaladores a `main`, `@6.4.0` en Grok Bot, etc.). Terceros: **NOT_EXECUTED**.
+
 ## 2026-11-13 (bounded semantic-obligation tooling)
 
 - **Añadido `tools/rxre/semantic/semantic_obligations.py`**: parser SMT-LIB con validación estructural de tres obligaciones BV32 concretas (`x*256 == x<<8`, `x*256 == x*25`, `x*256 == x<<7`). **No** afirma equivalencia general ni promueve binarios a `PROVEN`.
