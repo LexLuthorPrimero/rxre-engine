@@ -7,11 +7,18 @@
 
 - **La puerta pública ahora incluye esos 2 tests**: `verify.sh` (etapa 15) ejecuta `test_semantic_obligations.py` y el pin por defecto sube a **82 passed, 2 skipped**. Es una integración de una suite ya commitada — **no** es un re-sellado de manifiesto (65 artefactos intactos) ni una ampliación de scope ni una nueva milestone de objetivo. Referencias vivas de conteo actualizadas: README, QUICKSTART, reviewer-kit. Terceros: **NOT_EXECUTED**.
 
+## 2026-11-14 (bounded ZIP bounded-view verification of REA)
+
+- **Añadido `tools/rxre/parity/rea_verify_zip_bounded_views.py`**: herramienta standalone (stdlib-only) que ejercita el `dist/` real de REA y compara la vista acotada de ZIP contra un oráculo independiente en Python (regla: campo Unicode Path final gana; CRC final inválido ⇒ fallback a nombre almacenado; flag UTF-8 domina los campos Unicode Path). Genera tres fixtures sintéticos (`conflicting_fields`, `bad_final_crc`, `utf8_flag_precedence`), invoca `scanZipDirectory` vía Node.js y reporta PARITY / DIVERGENT / INCONCLUSIVE por fixture.
+  - Verifica: en `origin/main` (pre-fix) reporta DIVERGENT en 2/3 fixtures — detecta el bug sin depender de REA; en la rama de fix `fix/desktop-zip-unicode-path-last-field` reporta PARITY en los 3.
+  - No participa en la puerta `verify.sh` (requiere Node.js externo); el modelo Python-only sí lo hace.
+- **Añadido `tools/rxre/tests/test_rea_verify_zip_bounded_views.py`** (6 herméticos: modelo, fixtures y estructuras ZIP). Aumenta el verify pin actual (ver §74).
+
 ## 2026-11-13 (bounded-view parity harness)
 
 - **Añadido `tools/rxre/parity/bounded_parity.py`**: herramienta genérica acotada para contrastar una implementación **acotada** (subprocess con el probe por stdin) con una **producción/referencia** completa, sobre un corpus de probes declarado por el caller. Veredictos por probe: `PARITY` · `DIVERGENT` (con el probe identificado) · `INCONCLUSIVE` (bounded no determinista, no corre, o referencia no corre). Corpus vacío o contrato inválido falla cerrada (exit 3). Comparación seleccionable: `stdout-equal` (default) · `exit-equal` · `json-field:NOMBRE`. **No** afirma equivalencia general, no es evidencia fuera del corpus, no es independencia ni autenticidad; declaración de alcance impresa en cada corrida.
 - **Añadido `tools/rxre/tests/test_bounded_parity.py`**: 6 herméticos (paridad, divergencia identificada al probe, crash⇒INCONCLUSIVE, no determinismo⇒INCONCLUSIVE, corpus vacío⇒fail-closed, códigos de salida CLI).
-- **La puerta pública ahora incluye esos 6 tests**: `verify.sh` (etapa 15) ejecuta `test_bounded_parity.py` y el pin por defecto sube a **88 passed, 2 skipped**. Es integración de una suite ya commitada — **no** es re-sellado (manifiesto intacto, 65 artefactos) ni ampliación de scope ni nuevo objetivo. ADR: cualquiera que use una bounded view del motor puede ahora contraponerla a la herramienta completa con la misma disciplina que el escaneo Unicode Path de REA (salto a `settings.json`) exigió. Terceros: **NOT_EXECUTED**.
+- **La puerta pública ahora incluye esos 6 tests**: `verify.sh` (etapa 15) ejecuta `test_bounded_parity.py` y el pin por defecto sube a **94 passed, 2 skipped**. Es integración de una suite ya commitada — **no** es re-sellado (manifiesto intacto, 65 artefactos) ni ampliación de scope ni nuevo objetivo. ADR: cualquiera que use una bounded view del motor puede ahora contraponerla a la herramienta completa con la misma disciplina que el escaneo Unicode Path de REA (salto a `settings.json`) exigió. Terceros: **NOT_EXECUTED**.
 
 ## 2026-11-13 (basename milestone v1.9.0)
 
