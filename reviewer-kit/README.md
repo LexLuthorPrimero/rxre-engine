@@ -17,8 +17,7 @@ dictamen; solo te dan los pasos y los límites.
    el oráculo real.
 2. **Los fallos de integridad cuentan como hallazgo válido.** Si un sello no
    coincide, repórtalo: significa corrupción del paquete, no "malinterpretación".
-3. **Nada se promete fuera de los dominios sellados.** filenvercmp y wc solo.
-   Una afirmación sobre otro binario requiere otra cadena, no este repo.
+3. **Nada se promete fuera de los dominios sellados.** filenvercmp, wc, fold, tr, dirname y basename — solo. Una afirmación sobre otro binario requiere otra cadena, no este repo.
 4. Este kit **no autoriza** acceso a hardware, red o binarios fuera de lo
    documentado, ni constituye certificación pública: la puerta (`PUERTA`,
    condición 3) se abre con tu dictamen escrito, no con documentación.
