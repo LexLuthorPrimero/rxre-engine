@@ -1,5 +1,11 @@
 # RXRE — CHANGELOG documental
 
+## 2026-11-14 (Markdown link/anchor verification tooling)
+
+- **Añadido `tools/rxre/parity/check_md_links.py`**: verificador reutilizable (stdlib-only, sin red) de enlaces relativos y anchors en un árbol Markdown: objetivo relativo inexistente, anchor que no nombra un heading ni un `<a|div id>` (línea estructural de REA #8334), salidas del repo root rechazadas, code blocks y spans ignorados, enlaces de esquema y absolutos reportados como omitidos. Slugify tipo GitHub (lowercase, espacios→guiones, punctuation/control fuera, ZWNJ/ZWJ y marks conservados — aproximación sin promesa byte-perfecta). Dogfood sobre el árbol de `morluto/rea`: **0 enlaces rotos** (533 archivos, 3559 enlaces relativos, 5662 exclusiones esquema/absoluta). **No** es un validador de `http(s)` ni de semántica de publicación; no promueve artefactos a `PROVEN`.
+- **Añadido `tools/rxre/tests/test_check_md_links.py`**: 10 herméticos (tree limpio, target ausente, anchor ausente, anchor same-file, code-fence ignored, esquema skipped, absolutas skipped, `<div id>` anchors, escape de root, esquema JSON).
+- **La puerta pública ahora incluye esos 10 tests**: `verify.sh` (etapa 15) ejecuta `test_check_md_links.py` y el pin por defecto sube a **120 passed, 2 skipped**. Es integración de una suite ya commitada — **no** es re-sellado (65 artefactos intactos), **sin** ampliación de scope y **sin tag ni release**. Terceros: **NOT_EXECUTED**.
+
 ## 2026-11-14 (PTY SIGHUP probe)
 
 - **Añadido `tools/rxre/parity/pty_sighup_probe.py`**: verificador reutilizable (stdlib-only, sin red) del invariante POSIX de semántica de sesiones detrás del bug REA #8780: cuando un comando corre bajo PTY con el hijo como líder de sesión, el kernel entrega `SIGHUP` al grupo de procesos en primer plano cuando el líder sale — no como limpieza del framework, sino como haría `script -c`/`ssh -t`. Fixture embebida autocontenida; modos `direct` y `pty`; veredictos `PTY_SIGHUP_CONFIRMED` / `MISMATCH` / `INCONCLUSIVE`; `--json`. **No** afirma nada sobre macOS/Windows (PTYs POSIX), es un escenario acotado, no una suite de conformidad del kernel, y no promueve artefacto alguno a `PROVEN`.
